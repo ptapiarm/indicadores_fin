@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel Académico · Facultades</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root{
+    /* Colores institucionales */
+    --bg:#ECEBE5;
+    --white:#FFFFFF;
+    --ink:#000000;
+    --orange:#FF6F43;
+
+    /* Tonos derivados (solo opacidades de negro/naranja, sin nuevos matices) */
+    --navy:#ECEBE5;
+    --navy-2:#FFFFFF;
+    --navy-3:#DEDCD0;
+    --paper:#FFFFFF;
+    --paper-2:#ECEBE5;
+    --paper-line:#DAD8CC;
+    --ink-soft:rgba(0,0,0,0.6);
+    --cream:#000000;
+    --cream-soft:rgba(0,0,0,0.6);
+    --gold:#FF6F43;
+    --gold-soft:#FF6F43;
+
+    --derecho:#FF6F43;
+    --derecho-soft:#FFE3D8;
+    --economia:#FF6F43;
+    --economia-soft:#FFE3D8;
+    --ingenieria:#FF6F43;
+    --ingenieria-soft:#FFE3D8;
+
+    --accent: var(--orange);
+    --accent-soft: #FFE3D8;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif;
+    min-height:100vh;
+    padding: 28px 18px 60px;
+  }
+
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  /* ---------- MASTHEAD ---------- */
+  .masthead{
+    display:flex; align-items:center; gap:20px;
+    padding: 6px 6px 26px 6px;
+    color:var(--ink);
+  }
+  .masthead-logo{
+    flex:none;
+    height:52px;
+    width:auto;
+    display:block;
+  }
+  .masthead h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(24px, 3.4vw, 34px);
+    margin:0 0 4px 0;
+    letter-spacing:0.2px;
+    color:var(--ink);
+  }
+  .masthead-sub{
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    letter-spacing:0.3px;
+    color:var(--accent);
+  }
+  .masthead p{
+    margin:0;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    letter-spacing:0.3px;
+  }
+  .masthead .eyebrow{
+    text-transform:uppercase;
+    font-size:11px;
+    letter-spacing:2px;
+    color:var(--orange);
+    font-weight:700;
+    margin-bottom:6px;
+    display:block;
+  }
+
+  /* ---------- FOLDER TABS ---------- */
+  .tabs{
+    display:flex; gap:8px;
+    padding: 0 10px;
+    position:relative;
+    z-index:2;
+  }
+  .tab{
+    appearance:none; border:none; cursor:pointer;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600;
+    font-size:14px;
+    padding:14px 22px 16px;
+    border-radius:12px 12px 0 0;
+    background:var(--navy-3);
+    color:var(--ink-soft);
+    display:flex; align-items:center; gap:10px;
+    transform:translateY(6px);
+    transition: all .22s ease;
+    border-top:3px solid transparent;
+  }
+  .tab .dot{
+    width:20px;height:20px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Fraunces',serif; font-size:10px; font-weight:700;
+    background:rgba(0,0,0,0.1); color:inherit;
+    flex:none;
+  }
+  .tab:hover{ color:var(--ink); transform:translateY(2px); }
+  .tab.active{
+    background:var(--paper);
+    color:var(--ink);
+    transform:translateY(0);
+    border-top:3px solid var(--accent);
+    box-shadow: 0 -6px 18px rgba(0,0,0,0.10);
+  }
+  .tab.active .dot{ background:var(--accent); color:var(--white); }
+
+  /* ---------- PAPER SHEET ---------- */
+  .sheet{
+    background:var(--paper);
+    border-radius:16px;
+    padding: 34px 34px 40px;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.35);
+    position:relative;
+  }
+  .sheet::after{
+    content:'';
+    position:absolute; left:34px; right:34px; top:0;
+    height:1px; background:var(--paper-line);
+    display:none;
+  }
+
+  .fac-header{
+    display:flex; justify-content:space-between; align-items:flex-start;
+    flex-wrap:wrap; gap:18px;
+    padding-bottom:22px; margin-bottom:26px;
+    border-bottom:1px solid var(--paper-line);
+  }
+  .fac-header h2{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:clamp(26px,3vw,38px);
+    margin:0 0 6px 0;
+    color:var(--ink);
+  }
+  .fac-header .sub{
+    font-size:13.5px; color:var(--ink-soft);
+    max-width:520px; line-height:1.5;
+  }
+
+  /* ---------- ESTADO ACTUAL TITLE ---------- */
+  .estado-actual-title{ margin: 6px 0 18px; }
+  .estado-actual-title .eyebrow-mini{
+    display:block; text-transform:uppercase; letter-spacing:2.5px;
+    font-size:10.5px; font-weight:700; color:var(--accent); margin-bottom:5px;
+  }
+  .estado-actual-title h3{
+    font-family:'Fraunces', serif; font-weight:700;
+    font-size:clamp(22px,2.4vw,28px); margin:0; color:var(--ink); letter-spacing:0.2px;
+  }
+
+  /* ---------- KPI ROW ---------- */
+  .kpis{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(150px,1fr));
+    gap:14px;
+    margin-bottom:32px;
+  }
+  .kpi{
+    background:var(--paper-2);
+    border:1px solid var(--paper-line);
+    border-radius:10px;
+    padding:16px 16px 14px;
+    position:relative;
+  }
+  .kpi::before{
+    content:attr(data-idx);
+    position:absolute; top:10px; right:12px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10px; color:var(--paper-line);
+  }
+  .kpi .lab{
+    font-size:11px; text-transform:uppercase; letter-spacing:1px;
+    color:var(--ink-soft); font-weight:600; margin-bottom:10px;
+    max-width:85%;
+  }
+  .kpi .val{
+    font-family:'Fraunces', serif;
+    font-size:28px; font-weight:600; color:var(--ink);
+    line-height:1;
+  }
+  .kpi .val span{ font-size:15px; font-weight:500; color:var(--ink-soft);}
+  .kpi .delta{
+    margin-top:8px; font-size:11.5px; font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+  }
+  .kpi .delta.up{color:var(--orange);}
+  .kpi .delta.down{color:var(--ink);}
+  .kpi .delta.flat{color:var(--ink-soft);}
+  .kpi-note{
+    margin-top:8px; font-size:10.5px; color:var(--ink-soft); font-style:italic;
+  }
+  .kpi-breakdown{
+    margin-top:10px; padding-top:8px;
+    border-top:1px dashed var(--paper-line);
+    max-height:104px; overflow-y:auto;
+  }
+  .kpi-breakdown::-webkit-scrollbar{ width:4px; }
+  .kpi-breakdown::-webkit-scrollbar-thumb{ background:var(--paper-line); border-radius:4px; }
+  .kpi-row{
+    display:flex; justify-content:space-between; align-items:baseline; gap:8px;
+    padding:2px 0;
+  }
+  .kpi-row .kn{
+    font-family:'IBM Plex Sans',sans-serif; font-size:10px;
+    color:var(--ink-soft);
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    max-width:68%;
+  }
+  .kpi-row .kv{
+    font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:600;
+    color:var(--ink); flex:none;
+  }
+
+  /* ---------- SECTION LABELS ---------- */
+  .section-title{
+    display:flex; align-items:baseline; gap:10px;
+    margin: 40px 0 16px;
+  }
+  .section-title .n{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px; color:var(--accent);
+    border:1px solid var(--accent);
+    border-radius:20px; padding:2px 9px;
+  }
+  .section-title h3{
+    font-family:'Fraunces', serif; font-weight:600;
+    font-size:19px; margin:0; color:var(--ink);
+  }
+  .section-title .line{
+    flex:1; height:1px; background:var(--paper-line);
+  }
+
+  /* ---------- CHART GRID ---------- */
+  .chart-grid{
+    display:grid;
+    grid-template-columns: 1.35fr 1fr;
+    gap:18px;
+  }
+  .chart-grid > *{ min-width:0; }
+  .chart-grid.thirds{ grid-template-columns: 1fr 1fr; }
+  .chart-grid.thirds3{ grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 980px){
+    .chart-grid.thirds3{ grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 820px){
+    .chart-grid, .chart-grid.thirds, .chart-grid.thirds3{ grid-template-columns:1fr; }
+  }
+
+  /* ---------- SUB TABS (Pregrado / Postgrado / Educación Continua) ---------- */
+  .subtabs{
+    display:flex; gap:6px; flex-wrap:wrap;
+    margin: 4px 0 28px;
+    border-bottom:1px solid var(--paper-line);
+    padding-bottom:2px;
+  }
+  .subtab{
+    appearance:none; border:none; cursor:pointer;
+    background:transparent;
+    font-family:'IBM Plex Sans', sans-serif;
+    font-weight:600; font-size:12.5px;
+    letter-spacing:0.3px;
+    color:var(--ink-soft);
+    padding:9px 16px;
+    border-radius:20px;
+    transition: all .18s ease;
+  }
+  .subtab:hover{ color:var(--ink); background:var(--paper-2); }
+  .subtab.active{
+    background:var(--accent);
+    color:var(--white);
+  }
+
+  /* ---------- CARRERA SELECTOR ---------- */
+  .carrera-selector-wrap{
+    margin: 2px 0 24px;
+  }
+  .carrera-selector-label{
+    font-size:10.5px; text-transform:uppercase; letter-spacing:1.5px; font-weight:700;
+    color:var(--ink-soft); margin-bottom:8px; display:block;
+  }
+  .carrera-selector{
+    display:flex; gap:8px; overflow-x:auto; padding-bottom:6px;
+    scrollbar-width: thin;
+  }
+  .carrera-selector::-webkit-scrollbar{ height:5px; }
+  .carrera-selector::-webkit-scrollbar-thumb{ background:var(--paper-line); border-radius:4px; }
+  .carrera-pill{
+    flex:none; appearance:none; cursor:pointer;
+    padding:8px 15px; border-radius:20px;
+    border:1.5px solid var(--paper-line);
+    background:var(--white);
+    font-family:'IBM Plex Sans', sans-serif;
+    font-size:12px; font-weight:600; color:var(--ink-soft);
+    white-space:nowrap; transition: all .15s ease;
+    max-width:220px; overflow:hidden; text-overflow:ellipsis;
+  }
+  .carrera-pill:hover{ border-color:var(--accent); color:var(--ink); }
+  .carrera-pill.active{
+    background:var(--accent); border-color:var(--accent); color:var(--white);
+  }
+
+  .card{
+    background:var(--white);
+    border:1px solid var(--paper-line);
+    border-radius:12px;
+    padding:18px 20px 14px;
+  }
+  .card h4{
+    margin:0 0 2px; font-size:13.5px; font-weight:600; color:var(--ink);
+    font-family:'IBM Plex Sans',sans-serif;
+  }
+  .card .note{ font-size:11px; color:var(--ink-soft); margin-bottom:10px;}
+  .card canvas{ max-height:270px; }
+  .card.tall canvas{ max-height:320px; }
+
+  /* ---------- TABLE ---------- */
+  .ledger-wrap{
+    background:var(--white);
+    border:1px solid var(--paper-line);
+    border-radius:12px;
+    overflow-x:auto;
+  }
+  table.ledger{
+    width:100%; border-collapse:collapse;
+    font-size:12.8px;
+  }
+  table.ledger th{
+    text-align:left;
+    background:var(--paper-2);
+    color:var(--ink-soft);
+    font-weight:600;
+    font-size:10.5px;
+    text-transform:uppercase; letter-spacing:0.6px;
+    padding:10px 12px;
+    border-bottom:1px solid var(--paper-line);
+    white-space:nowrap;
+  }
+  table.ledger td{
+    padding:10px 12px;
+    border-bottom:1px solid var(--paper-line);
+    font-family:'IBM Plex Mono', monospace;
+    color:var(--ink);
+    white-space:nowrap;
+  }
+  table.ledger td.name{
+    font-family:'IBM Plex Sans',sans-serif;
+    font-weight:500;
+    white-space:normal;
+    min-width:220px;
+  }
+  table.ledger tr:last-child td{border-bottom:none;}
+  table.ledger tr:hover td{ background:var(--accent-soft); }
+  table.ledger tr.selected-row td{ background:var(--accent-soft); font-weight:600; }
+  .mod-badge{
+    display:inline-block; font-size:10px; font-family:'IBM Plex Sans',sans-serif;
+    font-weight:600; padding:2px 7px; border-radius:20px;
+    background:var(--paper-2); color:var(--ink-soft);
+  }
+  .mod-badge.status-active{
+    background:var(--accent-soft); color:var(--accent);
+  }
+  table.ledger tr.row-muted td{ color:var(--ink-soft); opacity:0.6; }
+  table.ledger tr.row-muted td.name{ font-weight:400; }
+  .bar-cell{ display:flex; align-items:center; gap:8px; }
+  .bar-track{ width:56px; height:6px; background:var(--paper-2); border-radius:4px; overflow:hidden; flex:none;}
+  .bar-fill{ height:100%; background:var(--accent); }
+
+  /* ---------- POSTGRADO ---------- */
+  .empty-state{
+    border:2px dashed var(--paper-line);
+    border-radius:14px;
+    padding:40px 20px;
+    text-align:center;
+    color:var(--ink-soft);
+  }
+  .empty-state .stampbig{
+    display:inline-block;
+    border:2px dashed var(--accent);
+    color:var(--accent);
+    border-radius:10px;
+    padding:10px 22px;
+    transform:rotate(-4deg);
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    letter-spacing:1.5px;
+    font-size:13px;
+    margin-bottom:14px;
+  }
+  .empty-state p{ font-size:13px; max-width:420px; margin:0 auto; line-height:1.6;}
+
+  footer{
+    max-width:1180px; margin:26px auto 0;
+    padding:0 10px;
+    color:var(--ink-soft);
+    font-size:11.5px;
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
+  }
+
+  @media (max-width:640px){
+    .sheet{padding:22px 16px 30px;}
+    .tab{padding:11px 14px 13px; font-size:12.5px;}
+    .tab span.label{display:none;}
+    .fac-header{flex-direction:column;}
+    .masthead-logo{height:38px;}
+    .masthead{gap:12px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <img class="masthead-logo" src="data:image/png;base64,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" alt="Universidad Alberto Hurtado">
+    <div>
+      <h1>Indicadores Académicos</h1>
+      <div class="masthead-sub">Facultad de Ingeniería</div>
+    </div>
+  </div>
+
+  <div class="sheet" id="sheet">
+    <!-- content injected by JS -->
+  </div>
+
+  <footer>
+    <span>Fuente: Consolidado por Facultad · Postgrados por Facultad</span>
+    <span id="lastFac"></span>
+  </footer>
+</div>
+
+<script>
+const DATA = {"Ingeniería": {"pregrado": {"carreras": [{"nombre": "Ingeniería Civil en Informática (Diurno)", "modalidad": "DIURNA", "codigo": 48.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 1.0, "2025": 12.0, "2026": 36.0}, "nuevos": {"2024": 1.0, "2025": 11.0, "2026": 26.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 25.0, "2025": 10.0, "2026": 10.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 20.0, "2025": 0.0, "2026": 0.0}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.9090909090909091}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2024": 0.04, "2025": 0.1, "2026": 0.0}, "nuevos_ocup": {"2024": 1, "2025": 1, "2026": 0}}, {"nombre": "Ingeniería Civil Industrial (Diurno)", "modalidad": "DIURNA", "codigo": 47.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 1.0, "2025": 20.0, "2026": 40.0}, "nuevos": {"2024": 1.0, "2025": 19.0, "2026": 23.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 75.0, "2025": 10.0, "2026": 10.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 40.0, "2025": 0.0, "2026": 0.0}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.8421052631578947}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2024": 0.013333333333333334, "2025": 0.1, "2026": 0.0}, "nuevos_ocup": {"2024": 1, "2025": 1, "2026": 0}}, {"nombre": "Ingeniería Civil Industrial (online)", "modalidad": "ONLINE", "codigo": 10054.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 76.0, "2026": 177.0}, "nuevos": {"2025": 76.0, "2026": 92.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 40.0, "2026": 80.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 40.0, "2026": 30.0}, "vac_2do_sem": {"2025": 34.0, "2026": 15.0}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.8157894736842105}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2025": 2.025, "2026": 1.2125}, "nuevos_ocup": {"2024": 0, "2025": 81, "2026": 97}}, {"nombre": "Ingeniería Civil Industrial (Vespertino)", "modalidad": "VESPERTINA", "codigo": 49.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0}, "nuevos": {"2024": 0.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0, "2026": 0.0}, "vac_otros_ofrecidas": {}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {}, "nuevos_ocup": {"2024": 0, "2025": 0, "2026": 0}}, {"nombre": "Ingeniería Civil plan común", "modalidad": "DIURNA", "codigo": 46.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 106.0, "2025": 160.0, "2026": 198.0}, "nuevos": {"2023": 44.0, "2024": 74.0, "2025": 103.0, "2026": 106.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 70.0, "2024": 80.0, "2025": 90.0, "2026": 110.0}, "vac_otros_ofrecidas": {}, "vac_2do_sem": {"2024": 3.0, "2025": 1.0}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2023": 0.7272727272727273, "2024": 0.7567567567567568, "2025": 0.8857142857142857}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2023": 0.44285714285714284, "2024": 0.6625, "2025": 1.011111111111111, "2026": 0.8818181818181818}, "nuevos_ocup": {"2021": 0, "2022": 0, "2023": 31, "2024": 53, "2025": 91, "2026": 97}}], "total_facultad": {"vigentes": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 108.0, "2025": 268.0, "2026": 451.0}, "nuevos": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 76.0, "2025": 209.0, "2026": 247.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 70.0, "2024": 180.0, "2025": 150.0, "2026": 210.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 60.0, "2025": 40.0, "2026": 30.0}, "vac_2do_sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 3.0, "2025": 35.0, "2026": 15.0}, "vac_1er_trim": {"2024": 0.0}, "vac_3er_trim": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0, "2026": 0.0}, "retencion_1er_anio": {"2023": 0.7272727272727273, "2024": 0.7567567567567568, "2025": 0.8578199052132701}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2023": 0.44285714285714284, "2024": 0.3055555555555556, "2025": 1.16, "2026": 0.9238095238095239}, "nuevos_ocup": {"2024": 55, "2025": 174, "2026": 194, "2021": 0, "2022": 0, "2023": 31}}, "planta_docente": {"years": [2022, 2023, 2024, 2025, 2026], "rows": {"N° Honorarios": [null, 4.0, 8.0, 16.0, 27.0], "N° Planta": [null, 6.0, 7.0, 7.0, 8.0], "Total": [0.0, 10.0, 15.0, 23.0, 35.0]}}, "jce": {"years": [2022, 2023, 2024, 2025, 2026], "categorias": {"ASISTENTE": [null, 1.0, 1.0, 1.0, null], "ASOCIADO": [null, 2.0, 3.0, 3.0, 3.0], "Sin categorizar": [null, 7.0, 3.7000000000000006, 4.712500000000001, 10.164999999999996]}, "total": [null, 10.0, 7.700000000000001, 8.712500000000002, 13.164999999999996]}, "jce_per_student": {"years": [2022, 2023, 2024, 2025, 2026], "values": [null, 4.4, 14.025974025974024, 30.76040172166427, 34.25750094948729]}, "empleabilidad": null, "gratuidad": {"years": [2020, 2021, 2022, 2023, 2024, 2025, 2026], "facultad": {"nombre": "INGENIERÍA", "valores": [null, null, null, 0.673469387755102, 0.85, 0.4473684210526316, 0.48484848484848486]}, "carreras": [{"nombre": "INGENIERÍA CIVIL EN INFORMÁTICA", "valores": [null, null, null, null, 1.0, 1.0, null]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL", "valores": [null, null, null, null, 1.0, 1.0, null]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL (ONLINE)", "valores": [null, null, null, null, null, 0.0, 0.0]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL VESPERTINO", "valores": [null, null, null, null, 0.0, null, null]}, {"nombre": "INGENIERÍA CIVIL PLAN COMÚN", "valores": [null, null, null, 0.673469387755102, 0.8571428571428571, 0.8771929824561403, 0.897196261682243]}]}, "genero": {"matricula_mujer": {"2023": 0.4090909090909091, "2024": 0.28703703703703703, "2025": 0.24253731343283583, "2026": 0.2572062084257206}, "matricula_hombre": {"2023": 0.5909090909090909, "2024": 0.7129629629629629, "2025": 0.7574626865671642, "2026": 0.7427937915742794}, "retencion_1er_mujer": {"2023": 0.6666666666666666, "2024": 0.7368421052631579, "2025": 0.8823529411764706}, "retencion_1er_hombre": {"2023": 0.7586206896551724, "2024": 0.7719298245614035, "2025": 0.85}, "retencion_3er_mujer": {}, "retencion_3er_hombre": {}}}, "postgrado": null, "educacion_continua": null, "investigacion": {"tipos": [{"nombre": "Fondecyt", "valores": {"2023": 0, "2024": 2}}, {"nombre": "Fondos Académicos (no Fondecyt)", "valores": {"2023": 3, "2024": 0}}, {"nombre": "Fondos Internos UAH", "valores": {"2023": 0, "2024": 1}}, {"nombre": "Proyectos de Pertinencia Pública y Relevancia Social", "valores": {"2023": 1, "2024": 0}}, {"nombre": "Proyectos de Cultura", "valores": {"2023": 0, "2024": 0}}], "total": {"2023": 4, "2024": 3}, "vigentes": {"tipos": [{"nombre": "Fondecyt", "valores": {"2023": 0, "2024": 2}}, {"nombre": "Fondos Académicos (no Fondecyt)", "valores": {"2023": 3, "2024": 2}}, {"nombre": "Fondos Internos UAH", "valores": {"2023": 0, "2024": 1}}, {"nombre": "Proyectos de Pertinencia Pública", "valores": {"2023": 1, "2024": 1}}, {"nombre": "Proyectos de Cultura", "valores": {"2023": 0, "2024": 0}}], "total": {"2023": 4, "2024": 6}}}}};
+/* ============================================================
+   Panel Académico de Facultades — lógica de la aplicación
+   ============================================================ */
+
+/* ============================================================
+   Panel Académico de Facultades — lógica de la aplicación (v2)
+   ============================================================ */
+
+const FAC_META = {
+  'Derecho': { short:'DER', accent:'--derecho', soft:'--derecho-soft', icon:'D' },
+  'Economía y Negocios': { short:'EYN', accent:'--economia', soft:'--economia-soft', icon:'E' },
+  'Ingeniería': { short:'ING', accent:'--ingenieria', soft:'--ingenieria-soft', icon:'I' },
+};
+const FAC_ORDER = ['Derecho', 'Economía y Negocios', 'Ingeniería'];
+const YEARS = [2021,2022,2023,2024,2025,2026];
+const SUBTABS = [
+  { key:'pregrado', label:'Pregrado' },
+  { key:'postgrado', label:'Postgrado' },
+  { key:'educacion_continua', label:'Educación Continua' },
+  { key:'investigacion', label:'Investigación' },
+];
+
+let charts = {};
+let currentFac = "Ingeniería";
+let currentSub = 'pregrado';
+let currentCarrera = null; // null = facultad completa (todas las carreras)
+
+/* ---------------- Formatting helpers ---------------- */
+function fmtInt(v){
+  if(v===null || v===undefined || isNaN(v)) return '—';
+  return Math.round(v).toLocaleString('es-CL');
+}
+function fmtPct(v){
+  if(v===null || v===undefined || isNaN(v)) return '—';
+  return (v*100).toFixed(1) + '%';
+}
+function fmtNum1(v){
+  if(v===null || v===undefined || isNaN(v)) return '—';
+  return v.toLocaleString('es-CL', {maximumFractionDigits:1});
+}
+function lastEntry(obj){
+  if(!obj) return [null,null];
+  const keys = Object.keys(obj).map(Number).sort((a,b)=>a-b);
+  if(!keys.length) return [null,null];
+  const k = keys[keys.length-1];
+  return [k, obj[k]];
+}
+function objYears(obj){
+  if(!obj) return [];
+  return Object.keys(obj).map(Number).sort((a,b)=>a-b);
+}
+/* Year-over-year change: compares the LAST available data point against the one right before it
+   (not a fixed baseline year), using the exact values already extracted from the Excel. */
+function yoyDeltaPct(obj){
+  const years = objYears(obj);
+  if(years.length<2) return null;
+  const lastY = years[years.length-1], prevY = years[years.length-2];
+  const lastV = obj[String(lastY)], prevV = obj[String(prevY)];
+  if(prevV===null||prevV===undefined||prevV===0||lastV===null||lastV===undefined) return null;
+  return { val:(lastV-prevV)/prevV*100, lastY, prevY, unit:'%' };
+}
+function yoyDeltaPP(obj){
+  const years = objYears(obj);
+  if(years.length<2) return null;
+  const lastY = years[years.length-1], prevY = years[years.length-2];
+  const lastV = obj[String(lastY)], prevV = obj[String(prevY)];
+  if(prevV===null||prevV===undefined||lastV===null||lastV===undefined) return null;
+  return { val:(lastV-prevV)*100, lastY, prevY, unit:'pp' };
+}
+function deltaBadge(d){
+  if(!d) return '';
+  const cls = d.val>=0 ? 'up' : 'down';
+  const arrow = d.val>=0 ? '▲' : '▼';
+  const valStr = d.unit==='pp' ? Math.abs(d.val).toFixed(1) : Math.abs(d.val).toFixed(0);
+  return `<div class="delta ${cls}">${arrow} ${valStr}${d.unit==='pp'?' pp':'%'} vs ${d.prevY}</div>`;
+}
+function seriesFor(obj, years){
+  return years.map(y => (obj && obj[String(y)]!==undefined) ? obj[String(y)] : null);
+}
+function sumAcrossCarreras(carreras, field, year){
+  let s = 0, any=false;
+  carreras.forEach(c=>{
+    const v = c[field] ? c[field][String(year)] : undefined;
+    if(v!==undefined && v!==null){ s+=v; any=true; }
+  });
+  return any ? s : null;
+}
+function anyDataIn(carreras, fields){
+  return carreras.some(c => fields.some(f => c[f] && Object.keys(c[f]).length>0));
+}
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function kpiBreakdown(carreras, field, year, formatter){
+  // Detalle por carrera/programa dentro de las tarjetas KPI: deshabilitado a pedido —
+  // las tarjetas muestran solo el valor agregado de la facultad (o de la carrera filtrada).
+  return '';
+}
+function destroyCharts(){
+  Object.values(charts).forEach(c=>c && c.destroy());
+  charts = {};
+}
+function accentColor(fac){
+  return getComputedStyle(document.documentElement).getPropertyValue(FAC_META[fac].accent).trim();
+}
+function shadesOf(hex, n){
+  const c = hexToRgb(hex);
+  const out = [];
+  for(let i=0;i<n;i++){
+    const t = n<=1 ? 0.15 : i/(n-1);
+    const mixLight = 0.15 + t*0.55;
+    out.push(mixHexWithWhite(c, mixLight));
+  }
+  return out;
+}
+/* High-contrast palette for small categorical breakdowns (e.g. JCE por jerarquía) where
+   tints of a single hue are too similar to tell apart. Stays within the institutional
+   palette: orange, black, white and the panel's neutral greys — just varied in lightness
+   and warmth instead of all being pale tints of the same orange. */
+function categoricalPalette(n){
+  const base = ['#FF6F43', '#1A1A1A', '#B9B7AC', '#C2410C', '#FFD3BB', '#7A7768'];
+  if(n <= base.length) return base.slice(0, n);
+  const extra = shadesOf('#FF6F43', n - base.length);
+  return base.concat(extra);
+}
+function hexToRgb(hex){
+  hex = hex.replace('#','').trim();
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+  const num = parseInt(hex,16);
+  return { r:(num>>16)&255, g:(num>>8)&255, b:num&255 };
+}
+function mixHexWithWhite(c, t){
+  const r = Math.round(c.r + (255-c.r)*t);
+  const g = Math.round(c.g + (255-c.g)*t);
+  const b = Math.round(c.b + (255-c.b)*t);
+  return `rgb(${r},${g},${b})`;
+}
+function shortenName(n, max){
+  max = max || 26;
+  return n.length > max ? n.slice(0,max-2)+'…' : n;
+}
+function baseFont(){
+  return { family: "'IBM Plex Sans', sans-serif", size: 11 };
+}
+/* Chart.js generates tick values like 0.07000000000000001 due to floating point math.
+   Rounding to 1 decimal before formatting removes that noise (7% instead of 7.000000000000001%). */
+function fmtPctTick(v){
+  const n = Math.round(v*1000)/10;
+  return (Number.isInteger(n) ? n : n.toFixed(1)) + '%';
+}
+function axisTitle(text){
+  return { display: !!text, text: text||'', font: {family: "'IBM Plex Sans', sans-serif", size:12, weight:'700'}, color:'#000000', padding:{top:8} };
+}
+function commonLineOpts(opts){
+  opts = opts || {};
+  const isPct = opts.isPct;
+  return {
+    responsive:true, maintainAspectRatio:false,
+    interaction:{ mode:'index', intersect:false },
+    plugins:{
+      legend:{ position:'bottom', labels:{ font:baseFont(), boxWidth:10, padding:10 } },
+      tooltip:{ titleFont:baseFont(), bodyFont:baseFont(), callbacks: isPct ? {
+        label: (item) => `${item.dataset.label}: ${fmtPctTick(item.parsed.y)}`
+      } : {} }
+    },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:baseFont() }, title: axisTitle(opts.xTitle) },
+      y:{
+        grid:{ color:'rgba(0,0,0,0.08)' },
+        ticks:{ font:baseFont(), callback: v => isPct ? fmtPctTick(v) : v },
+        beginAtZero:true,
+        title: axisTitle(opts.yTitle)
+      }
+    }
+  };
+}
+function commonBarOpts(opts){
+  opts = opts || {};
+  const isPct = opts.isPct, stacked = opts.stacked;
+  return {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{
+      legend:{ position:'bottom', labels:{ font:baseFont(), boxWidth:10, padding:10 } },
+      tooltip:{ titleFont:baseFont(), bodyFont:baseFont(), callbacks: isPct ? {
+        label: (item) => `${item.dataset.label}: ${fmtPctTick(item.parsed.y)}`
+      } : {} }
+    },
+    scales:{
+      x:{ grid:{ display:false }, ticks:{ font:baseFont() }, stacked: !!stacked, title: axisTitle(opts.xTitle) },
+      y:{
+        grid:{ color:'rgba(0,0,0,0.08)' },
+        ticks:{ font:baseFont(), callback: v => isPct ? fmtPctTick(v) : v },
+        beginAtZero:true, stacked: !!stacked,
+        title: axisTitle(opts.yTitle)
+      }
+    }
+  };
+}
+
+/* ---------------- Faculty Tabs ---------------- */
+function buildTabs(){
+  const wrap = document.getElementById('tabs');
+  wrap.innerHTML = '';
+  FAC_ORDER.forEach(fac=>{
+    const meta = FAC_META[fac];
+    const btn = document.createElement('button');
+    btn.className = 'tab' + (fac===currentFac ? ' active':'');
+    btn.innerHTML = `<span class="dot">${meta.icon}</span><span class="label">${fac}</span>`;
+    btn.addEventListener('click', ()=>{
+      if(currentFac===fac) return;
+      currentFac = fac;
+      currentSub = 'pregrado';
+      currentCarrera = null;
+      render();
+    });
+    wrap.appendChild(btn);
+  });
+}
+
+/* ---------------- Sub Tabs (Pregrado / Postgrado / Educación Continua) ---------------- */
+function buildSubTabs(){
+  return `<div class="subtabs" id="subtabs">
+    ${SUBTABS.map(s=>`<button class="subtab ${s.key===currentSub?'active':''}" data-sub="${s.key}">${s.label}</button>`).join('')}
+  </div>`;
+}
+function wireSubTabs(){
+  document.querySelectorAll('.subtab').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const sub = btn.getAttribute('data-sub');
+      if(sub===currentSub) return;
+      currentSub = sub;
+      renderContent();
+    });
+  });
+}
+
+/* ---------------- Carrera selector (only shown when a faculty has more than 1 carrera) ---------------- */
+function buildCarreraSelector(carreras){
+  return `<div class="carrera-selector-wrap">
+    <span class="carrera-selector-label">Ver por carrera</span>
+    <div class="carrera-selector" id="carreraSelector">
+      <button class="carrera-pill ${!currentCarrera?'active':''}" data-carrera="">Facultad completa</button>
+      ${carreras.map(c=>`<button class="carrera-pill ${currentCarrera===c.nombre?'active':''}" data-carrera="${escapeHtml(c.nombre)}" title="${escapeHtml(c.nombre)}">${escapeHtml(c.nombre)}</button>`).join('')}
+    </div>
+  </div>`;
+}
+function wireCarreraSelector(){
+  const wrap = document.getElementById('carreraSelector');
+  if(!wrap) return;
+  wrap.querySelectorAll('.carrera-pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const val = btn.getAttribute('data-carrera');
+      currentCarrera = val || null;
+      renderContent();
+    });
+  });
+}
+
+/* ---------------- Main render ---------------- */
+function render(){
+  document.documentElement.style.setProperty('--accent', `var(${FAC_META[currentFac].accent})`);
+  document.documentElement.style.setProperty('--accent-soft', `var(${FAC_META[currentFac].soft})`);
+
+  const fac = DATA[currentFac];
+  const pg = fac.pregrado;
+  const totals = pg.total_facultad;
+  const [vigY] = lastEntry(totals.vigentes);
+
+  const sheet = document.getElementById('sheet');
+  sheet.innerHTML = `
+    <div class="fac-header">
+      <div>
+        <h2>${currentFac}</h2>
+        <div class="sub">${pg.carreras.length} ${pg.carreras.length===1?'carrera de pregrado':'carreras de pregrado'} activas · ${[...new Set(pg.carreras.map(c=>c.modalidad).filter(Boolean))].join(' · ') || 'Modalidad presencial'}</div>
+      </div>
+    </div>
+    ${buildSubTabs()}
+    <div id="subcontent"></div>
+  `;
+  wireSubTabs();
+  renderContent();
+
+  document.getElementById('lastFac').textContent = `Vista actual: ${currentFac} · ${SUBTABS.find(s=>s.key===currentSub).label}`;
+}
+
+function renderContent(){
+  destroyCharts();
+  document.querySelectorAll('.subtab').forEach(b=>b.classList.toggle('active', b.getAttribute('data-sub')===currentSub));
+  const fac = DATA[currentFac];
+  const zone = document.getElementById('subcontent');
+  if(currentSub==='pregrado'){
+    renderPregrado(zone, fac.pregrado);
+  } else if(currentSub==='postgrado'){
+    renderPostgradoTab(zone, fac.postgrado);
+  } else if(currentSub==='educacion_continua'){
+    renderEducacionContinua(zone, fac.educacion_continua);
+  } else {
+    renderInvestigacion(zone, fac.investigacion);
+  }
+  document.getElementById('lastFac').textContent = `Vista actual: ${currentFac} · ${SUBTABS.find(s=>s.key===currentSub).label}`;
+}
+
+/* ================================================================
+   PREGRADO
+   ================================================================ */
+function renderPregrado(zone, pg){
+  const carreras = pg.carreras;
+  const hasMultiple = carreras.length > 1;
+
+  // If the previously selected carrera doesn't exist in this faculty, reset to "todas"
+  if(currentCarrera && !carreras.find(c=>c.nombre===currentCarrera)) currentCarrera = null;
+  const selected = (hasMultiple && currentCarrera) ? carreras.find(c=>c.nombre===currentCarrera) : null;
+  const dataSource = selected || pg.total_facultad; // same field shape in both cases
+  const scopeSuffix = selected ? ` — ${selected.nombre}` : '';
+  const periodosCarreras = selected ? [selected] : carreras;
+
+  const [vigY, vigV] = lastEntry(dataSource.vigentes);
+  const [nueY, nueV] = lastEntry(dataSource.nuevos);
+  const [vacY, vacV] = lastEntry(dataSource.vacantes_1sem);
+  const [ocuY, ocuV] = lastEntry(dataSource.tasa_ocupacion);
+  const [retY, retV] = lastEntry(dataSource.retencion_1er_anio);
+  const [ret3Y, ret3V] = lastEntry(dataSource.retencion_3er_anio);
+  const [toY, toV] = lastEntry(dataSource.titulacion_oportuna);
+  const [ttY, ttV] = lastEntry(dataSource.titulacion_total);
+
+  const plantaYears = (pg.planta_docente && pg.planta_docente.years) || [];
+  const lastPlantaIdx = plantaYears.length-1;
+  const rows = (pg.planta_docente && pg.planta_docente.rows) || {};
+  const honLast = lastPlantaIdx>=0 ? (rows['N° Honorarios']||[])[lastPlantaIdx] : null;
+  const planLast = lastPlantaIdx>=0 ? (rows['N° Planta']||[])[lastPlantaIdx] : null;
+  const totLast = lastPlantaIdx>=0 ? (rows['Total']||[])[lastPlantaIdx] : null;
+
+  const hasAltPeriods = anyDataIn(periodosCarreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim']);
+  const hasRet3 = objYears(dataSource.retencion_3er_anio).length>0;
+  const hasTitOp = objYears(dataSource.titulacion_oportuna).length>0;
+  const hasTitTot = objYears(dataSource.titulacion_total).length>0;
+  const hasEmpleabilidad = !!pg.empleabilidad;
+  const hasGratuidad = !!pg.gratuidad;
+  const hasJCEStudent = !!(pg.jce_per_student && pg.jce_per_student.years && pg.jce_per_student.years.length);
+  const hasGenero = !!pg.genero;
+  const hasGenero3er = hasGenero && objYears(pg.genero.retencion_3er_mujer).length>0;
+
+  // Breakdown-by-carrera lists only make sense when viewing the whole faculty
+  const bd = (field, year, fmt) => selected ? '' : kpiBreakdown(carreras, field, year, fmt);
+
+  zone.innerHTML = `
+    ${hasMultiple ? buildCarreraSelector(carreras) : ''}
+    <div class="estado-actual-title">
+      <span class="eyebrow-mini">Resumen ejecutivo${scopeSuffix}</span>
+      <h3>Estado Actual</h3>
+    </div>
+    <div class="kpis">
+      <div class="kpi" data-idx="00"><div class="lab">Carreras de pregrado</div><div class="val">${carreras.length}</div>
+        <div class="delta flat">${[...new Set(carreras.map(c=>c.modalidad).filter(Boolean))].join(' · ') || 'Modalidad presencial'}</div>
+      </div>
+      <div class="kpi" data-idx="01"><div class="lab">Matrícula vigente ${vigY||''}</div><div class="val">${fmtInt(vigV)}</div>
+        ${deltaBadge(yoyDeltaPct(dataSource.vigentes))}
+        ${bd('vigentes', vigY, fmtInt)}
+      </div>
+      <div class="kpi" data-idx="02"><div class="lab">Nuevos ${nueY||''}</div><div class="val">${fmtInt(nueV)}</div>
+        ${deltaBadge(yoyDeltaPct(dataSource.nuevos))}
+        ${bd('nuevos', nueY, fmtInt)}
+      </div>
+      <div class="kpi" data-idx="03"><div class="lab">Vacantes 1er sem. ${vacY||''}</div><div class="val">${fmtInt(vacV)}</div>
+        ${deltaBadge(yoyDeltaPct(dataSource.vacantes_1sem))}
+        ${bd('vacantes_1sem', vacY, fmtInt)}
+      </div>
+      <div class="kpi" data-idx="04"><div class="lab">Ocupación de vacantes</div><div class="val">${fmtPct(ocuV)}<span> ${ocuY||''}</span></div>
+        ${deltaBadge(yoyDeltaPP(dataSource.tasa_ocupacion))}
+        ${bd('tasa_ocupacion', ocuY, fmtPct)}
+        <div class="kpi-note">No considera Conducencias ni PACE</div>
+        <div class="kpi-note">Calculado con vacantes de 1er semestre</div>
+      </div>
+      <div class="kpi" data-idx="05"><div class="lab">Retención 1er año</div><div class="val">${fmtPct(retV)}<span> ${retY||''}</span></div>
+        ${deltaBadge(yoyDeltaPP(dataSource.retencion_1er_anio))}
+        ${bd('retencion_1er_anio', retY, fmtPct)}
+      </div>
+      <div class="kpi" data-idx="06"><div class="lab">Retención 3er año</div><div class="val">${fmtPct(ret3V)}<span> ${ret3Y||''}</span></div>
+        ${ret3Y ? deltaBadge(yoyDeltaPP(dataSource.retencion_3er_anio)) : ''}
+        ${ret3Y ? bd('retencion_3er_anio', ret3Y, fmtPct) : '<div class="kpi-note">Sin datos aún</div>'}
+      </div>
+      <div class="kpi" data-idx="07"><div class="lab">Titulación oportuna</div><div class="val">${fmtPct(toV)}<span> cohorte ${toY||''}</span></div>
+        ${toY ? deltaBadge(yoyDeltaPP(dataSource.titulacion_oportuna)) : ''}
+        ${toY ? bd('titulacion_oportuna', toY, fmtPct) : '<div class="kpi-note">Sin egresados aún</div>'}
+      </div>
+      <div class="kpi" data-idx="08"><div class="lab">Titulación total</div><div class="val">${fmtPct(ttV)}<span> cohorte ${ttY||''}</span></div>
+        ${ttY ? deltaBadge(yoyDeltaPP(dataSource.titulacion_total)) : ''}
+        ${ttY ? bd('titulacion_total', ttY, fmtPct) : '<div class="kpi-note">Sin egresados aún</div>'}
+      </div>
+      <div class="kpi" data-idx="09"><div class="lab">Planta docente ${plantaYears[lastPlantaIdx]||''}</div><div class="val">${fmtInt(totLast)}</div>
+        <div class="delta flat">${fmtInt(planLast)} planta · ${fmtInt(honLast)} honorarios</div>
+        <div class="kpi-note">Dato a nivel de Facultad completa</div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="n">01</span><h3>Matrícula Total</h3><div class="line"></div></div>
+    <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente${scopeSuffix}</h4><div class="note">Total vigentes al 30 de abril de cada año${(!selected && carreras.length>1) ? ', por carrera' : ''}</div><canvas id="chartVigentes"></canvas></div>
+
+    <div class="section-title"><span class="n">02</span><h3>Ocupación de vacantes — 1er semestre</h3><div class="line"></div></div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Tasa de ocupación de vacantes</h4><div class="note">% de vacantes cubiertas, línea de 100% como referencia. No considera Conducencias ni PACE.</div><canvas id="chartOcupacion"></canvas></div>
+      <div class="card"><h4>Vacantes vs. nuevos por año</h4><div class="note">Comparación directa${selected ? scopeSuffix : ', Facultad completa'}. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas></div>
+    </div>
+    ${hasAltPeriods ? `
+    <div class="section-title"><span class="n">02b</span><h3>Complemento — admisión en otros períodos</h3><div class="line"></div></div>
+    <div class="note" style="margin:-6px 0 14px; font-size:12px;">Algunas carreras ofrecen vacantes fuera del 1er semestre (2do semestre, 1er y 3er trimestre). Se muestra como complemento a la ocupación de 1er semestre.</div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Vacantes vs. matriculados en otros períodos</h4><div class="note">${selected ? scopeSuffix.replace(' — ','') : 'Suma Facultad'}: 2do sem., 1er y 3er trimestre</div><canvas id="chartPeriodos"></canvas></div>
+      <div class="card">
+        <h4>Detalle por carrera</h4><div class="note">Vacantes ofrecidas y matriculados por año</div>
+        <div class="ledger-wrap" style="border:none;"><table class="ledger" id="tblPeriodos"></table></div>
+      </div>
+    </div>` : ''}
+
+    <div class="section-title"><span class="n">03</span><h3>Retención</h3><div class="line"></div></div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Retención al 1er año</h4><div class="note">% de estudiantes que continúan tras el primer año</div><canvas id="chartRetencion1"></canvas></div>
+      <div class="card"><h4>Retención al 3er año</h4><div class="note">${hasRet3 ? '% de estudiantes que continúan tras el tercer año' : 'Sin datos disponibles'}</div>${hasRet3 ? '<canvas id="chartRetencion3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
+    </div>
+
+    ${hasGenero ? `
+    <div class="section-title"><span class="n">03b</span><h3>Composición por género</h3><div class="line"></div></div>
+    <div class="note" style="margin:-6px 0 14px; font-size:12px;">Matrícula y retención por género. Dato a nivel de Facultad.</div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Matrícula por género</h4><div class="note">% de mujeres y hombres sobre la matrícula total, por año</div><canvas id="chartGeneroMatricula"></canvas></div>
+      <div class="card"><h4>Retención 1er año por género</h4><div class="note">% que continúan tras el primer año, por cohorte de ingreso</div><canvas id="chartGeneroRet1"></canvas></div>
+      <div class="card"><h4>Retención 3er año por género</h4><div class="note">${hasGenero3er ? '% que continúan tras el tercer año, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasGenero3er ? '<canvas id="chartGeneroRet3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
+    </div>` : ''}
+
+    <div class="section-title"><span class="n">04</span><h3>Titulación</h3><div class="line"></div></div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Titulación oportuna</h4><div class="note">${hasTitOp ? '% titulados en el tiempo formal de la carrera, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitOp ? '<canvas id="chartTitOportuna"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
+      <div class="card"><h4>Titulación total</h4><div class="note">${hasTitTot ? '% titulados en total (con rezago), por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitTot ? '<canvas id="chartTitTotal"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
+    </div>
+
+    <div class="section-title"><span class="n">05</span><h3>Planta docente y jornadas académicas</h3><div class="line"></div></div>
+    ${selected ? `<div class="note" style="margin:-10px 0 14px; font-size:12px;">La planta docente y JCE solo existen a nivel de Facultad completa en el Excel; no varían al filtrar por carrera.</div>` : ''}
+    <div class="chart-grid thirds3">
+      <div class="card"><h4>Honorarios, planta y total</h4><div class="note">N° de docentes por tipo de contrato y año</div><canvas id="chartPlanta"></canvas></div>
+      <div class="card"><h4>JCE por jerarquía</h4><div class="note">Distribución por año</div><canvas id="chartJCE"></canvas></div>
+      <div class="card">${hasJCEStudent ? '<h4>JCE por estudiante</h4><div class="note">Jornadas completas equivalentes / matrícula</div><canvas id="chartJCEStudent"></canvas>' : '<h4>JCE por estudiante</h4>'+emptyMini('Sin datos disponibles')}</div>
+    </div>
+
+    <div class="section-title"><span class="n">06</span><h3>Empleabilidad y gratuidad</h3><div class="line"></div></div>
+    <div class="chart-grid">
+      <div class="card tall">${hasEmpleabilidad ? '<h4>Empleabilidad (Fuente Sies)</h4><div class="note">'+escapeHtml(pg.empleabilidad.descriptor||'')+', por cohorte de egreso</div><canvas id="chartEmpleabilidad"></canvas>' : '<h4>Empleabilidad (Fuente Sies)</h4>'+emptyMini('Sin datos de empleabilidad Sies para esta Facultad')}</div>
+      <div class="card tall">${hasGratuidad ? '<h4>% Estudiantes con gratuidad'+scopeSuffix+'</h4><div class="note">Por cohorte, información DAE</div><canvas id="chartGratuidad"></canvas>' : '<h4>% Estudiantes con gratuidad</h4>'+emptyMini('Sin datos disponibles')}</div>
+    </div>
+
+    <div class="section-title"><span class="n">07</span><h3>Detalle por carrera</h3><div class="line"></div></div>
+    <div class="ledger-wrap"><table class="ledger" id="tblCarreras"></table></div>
+    <div class="note" style="margin-top:8px; font-size:11px;">* La ocupación de vacantes no considera Conducencias ni PACE.</div>
+  `;
+
+  if(hasMultiple) wireCarreraSelector();
+
+  buildVigentesChart(carreras, selected);
+  buildOcupacionChart(dataSource);
+  buildVacNuevosCompChart(dataSource);
+  if(hasAltPeriods){ buildPeriodosChart(periodosCarreras); buildPeriodosTable(periodosCarreras); }
+  buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5));
+  if(hasRet3) buildRetencionGenericChart('chartRetencion3', dataSource.retencion_3er_anio, objYears(dataSource.retencion_3er_anio));
+  if(hasGenero){
+    buildGeneroLineChart('chartGeneroMatricula', pg.genero.matricula_mujer, pg.genero.matricula_hombre, objYears(pg.genero.matricula_mujer), 'Año', '% de matrícula');
+    buildGeneroLineChart('chartGeneroRet1', pg.genero.retencion_1er_mujer, pg.genero.retencion_1er_hombre, objYears(pg.genero.retencion_1er_mujer), 'Cohorte de ingreso', '% de retención');
+    if(hasGenero3er) buildGeneroLineChart('chartGeneroRet3', pg.genero.retencion_3er_mujer, pg.genero.retencion_3er_hombre, objYears(pg.genero.retencion_3er_mujer), 'Cohorte de ingreso', '% de retención');
+  }
+  if(hasTitOp) buildTitulacionChart('chartTitOportuna', dataSource.titulacion_oportuna);
+  if(hasTitTot) buildTitulacionChart('chartTitTotal', dataSource.titulacion_total);
+  buildPlantaChart(pg.planta_docente);
+  buildJCEChart(pg.jce);
+  if(hasJCEStudent) buildJCEStudentChart(pg.jce_per_student);
+  if(hasEmpleabilidad) buildEmpleabilidadChart(pg.empleabilidad);
+  if(hasGratuidad) buildGratuidadChart(pg.gratuidad, selected);
+  buildCarrerasTable(carreras, selected);
+}
+
+function emptyMini(msg){
+  return `<div style="padding:26px 10px; text-align:center; color:var(--ink-soft); font-size:12px; border:1.5px dashed var(--paper-line); border-radius:10px; margin-top:6px;">${msg}</div>`;
+}
+
+/* ---- Charts: matrícula / nuevos / ocupación ---- */
+function buildVigentesChart(carreras, selected){
+  const ctx = document.getElementById('chartVigentes');
+  if(selected){
+    charts.vigentes = new Chart(ctx, {
+      type:'line',
+      data:{ labels:YEARS, datasets:[{
+        label: shortenName(selected.nombre),
+        data: seriesFor(selected.vigentes, YEARS),
+        borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac)+'33',
+        fill:true, tension:0.35, spanGaps:true, pointRadius:3, borderWidth:2.5,
+      }] },
+      options: commonLineOpts({xTitle:'Año', yTitle:'Matriculados'})
+    });
+    return;
+  }
+  const top = [...carreras].sort((a,b)=>{
+    const av = (a.vigentes && a.vigentes['2026']) || 0;
+    const bv = (b.vigentes && b.vigentes['2026']) || 0;
+    return bv-av;
+  }).slice(0,6);
+  const palette = shadesOf(accentColor(currentFac), Math.max(top.length,1));
+  const datasets = top.map((c,i)=>({
+    label: shortenName(c.nombre),
+    data: seriesFor(c.vigentes, YEARS),
+    borderColor: palette[i], backgroundColor: palette[i],
+    tension:0.35, spanGaps:true, pointRadius:2.5, borderWidth:2,
+  }));
+  charts.vigentes = new Chart(ctx, { type:'line', data:{ labels:YEARS, datasets }, options: commonLineOpts({xTitle:'Año', yTitle:'Matriculados'}) });
+}
+function buildOcupacionChart(totals){
+  const ctx = document.getElementById('chartOcupacion');
+  const data = seriesFor(totals.tasa_ocupacion, YEARS);
+  charts.ocupacion = new Chart(ctx, {
+    type:'line',
+    data:{ labels:YEARS, datasets:[
+      { label:'Ocupación', data, borderColor:accentColor(currentFac), backgroundColor:accentColor(currentFac)+'33', fill:true, tension:0.3, pointRadius:3, borderWidth:2.5, spanGaps:true },
+      { label:'100% referencia', data:YEARS.map(()=>1), borderColor:'rgba(0,0,0,0.35)', borderDash:[4,4], pointRadius:0, borderWidth:1 }
+    ]},
+    options: commonLineOpts({xTitle:'Año', yTitle:'% de vacantes cubiertas', isPct:true})
+  });
+}
+function buildVacNuevosCompChart(totals){
+  const ctx = document.getElementById('chartVacNuevosComp');
+  charts.vacNuevosComp = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:YEARS, datasets:[
+      { label:'Vacantes 1er sem.', data:seriesFor(totals.vacantes_1sem, YEARS), backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:22 },
+      { label:'Nuevos matriculados', data:seriesFor(totals.nuevos_ocup, YEARS), backgroundColor:accentColor(currentFac), borderRadius:4, maxBarThickness:22 },
+    ]},
+    options: commonBarOpts({xTitle:'Año', yTitle:'Estudiantes'})
+  });
+}
+
+/* ---- Períodos complementarios ---- */
+function buildPeriodosChart(carreras){
+  const ctx = document.getElementById('chartPeriodos');
+  const matriculadosPorAnio = y => {
+    const s2 = sumAcrossCarreras(carreras,'vac_2do_sem',y);
+    const t1 = sumAcrossCarreras(carreras,'vac_1er_trim',y);
+    const t3 = sumAcrossCarreras(carreras,'vac_3er_trim',y);
+    const parts = [s2,t1,t3].filter(v=>v!==null);
+    return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
+  };
+  charts.periodos = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: YEARS, datasets:[
+      { label:'Vacantes ofrecidas', data: YEARS.map(y=>sumAcrossCarreras(carreras,'vac_otros_ofrecidas',y)), backgroundColor: '#D9D7CC', borderRadius:4, maxBarThickness:26 },
+      { label:'Matriculados', data: YEARS.map(matriculadosPorAnio), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:26 },
+    ]},
+    options: commonBarOpts({xTitle:'Año', yTitle:'Estudiantes'})
+  });
+}
+function buildPeriodosTable(carreras){
+  const tbl = document.getElementById('tblPeriodos');
+  const rows = carreras.filter(c => ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim'].some(f => c[f] && Object.keys(c[f]).length));
+
+  // Collect every year that has any data (vacantes ofrecidas or matriculados) across these carreras
+  const yearsSet = new Set();
+  rows.forEach(c=>{
+    ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim'].forEach(f=>{
+      Object.keys(c[f]||{}).forEach(y=>yearsSet.add(Number(y)));
+    });
+  });
+  let years = Array.from(yearsSet).sort((a,b)=>a-b);
+  if(years.length > 3) years = years.slice(-3); // solo los últimos 3 años con datos
+
+  const matriculadosDeCarrera = (c, y) => {
+    const parts = [c.vac_2do_sem, c.vac_1er_trim, c.vac_3er_trim]
+      .map(f => (f||{})[y]).filter(v => v!==undefined && v!==null);
+    return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
+  };
+
+  let html = `<thead><tr><th>Carrera</th><th></th>${years.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>`;
+  rows.forEach(c=>{
+    html += `<tr>
+      <td class="name" rowspan="2" style="vertical-align:middle;">${escapeHtml(c.nombre)}</td>
+      <td><span class="mod-badge">Vacantes</span></td>
+      ${years.map(y=>`<td>${fmtInt((c.vac_otros_ofrecidas||{})[y])}</td>`).join('')}
+    </tr>
+    <tr>
+      <td><span class="mod-badge">Matriculados</span></td>
+      ${years.map(y=>`<td>${fmtInt(matriculadosDeCarrera(c,y))}</td>`).join('')}
+    </tr>`;
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+/* ---- Retención genérica (1er / 3er año) ---- */
+function buildRetencionGenericChart(elId, obj, years){
+  const ctx = document.getElementById(elId);
+  const data = seriesFor(obj, years);
+  charts[elId] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:years, datasets:[{ label:'Retención', data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }] },
+    options: commonBarOpts({xTitle:'Cohorte de ingreso', yTitle:'% de retención', isPct:true})
+  });
+}
+function buildGeneroLineChart(elId, mujerObj, hombreObj, years, xTitle, yTitle){
+  const ctx = document.getElementById(elId);
+  charts[elId] = new Chart(ctx, {
+    type:'line',
+    data:{ labels: years, datasets:[
+      { label:'Mujeres', data: seriesFor(mujerObj, years), borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac), tension:0.3, pointRadius:3, borderWidth:2.5 },
+      { label:'Hombres', data: seriesFor(hombreObj, years), borderColor:'#B9B7AC', backgroundColor:'#B9B7AC', tension:0.3, pointRadius:3, borderWidth:2.5 }
+    ] },
+    options: commonLineOpts({xTitle, yTitle, isPct:true})
+  });
+}
+
+/* ---- Titulación (oportuna / total) ---- */
+function buildTitulacionChart(elId, obj){
+  const years = objYears(obj);
+  const ctx = document.getElementById(elId);
+  const data = seriesFor(obj, years);
+  charts[elId] = new Chart(ctx, {
+    type:'bar',
+    data:{ labels:years, datasets:[{ label:'Cohorte', data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }] },
+    options: commonBarOpts({xTitle:'Cohorte de ingreso', yTitle:'% titulados', isPct:true})
+  });
+}
+
+/* ---- Planta / JCE ---- */
+function buildPlantaChart(planta){
+  const ctx = document.getElementById('chartPlanta');
+  if(!planta){ return; }
+  const rows = planta.rows || {};
+  charts.planta = new Chart(ctx, {
+    data:{ labels: planta.years || [], datasets:[
+      { type:'bar', label:'Honorarios', data: rows['N° Honorarios']||[], backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:24 },
+      { type:'bar', label:'Planta', data: rows['N° Planta']||[], backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:24 },
+      { type:'line', label:'Total', data: rows['Total']||[], borderColor:'#000000', backgroundColor:'#000000', tension:0.3, pointRadius:3, borderWidth:2 },
+    ]},
+    options: commonBarOpts({xTitle:'Año', yTitle:'N° de docentes'})
+  });
+}
+function buildJCEChart(jce){
+  const ctx = document.getElementById('chartJCE');
+  if(!jce || !jce.categorias || !Object.keys(jce.categorias).length){
+    ctx.parentElement.innerHTML = '<h4>JCE por jerarquía</h4><div class="note">Sin datos disponibles</div>';
+    return;
+  }
+  const years = jce.years || [];
+  const cats = Object.keys(jce.categorias).filter(c => jce.categorias[c].some(v => v!==null && v!==undefined));
+  const palette = categoricalPalette(cats.length);
+  charts.jce = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: years, datasets: cats.map((c,i)=>({
+      label: c, data: jce.categorias[c], backgroundColor: palette[i], borderRadius:2, maxBarThickness:34
+    })) },
+    options: commonBarOpts({xTitle:'Año', yTitle:'Jornadas Completas Equivalentes (JCE)', stacked:true})
+  });
+}
+function buildJCEStudentChart(jps){
+  const ctx = document.getElementById('chartJCEStudent');
+  charts.jceStudent = new Chart(ctx, {
+    type:'line',
+    data:{ labels: jps.years, datasets:[{ label:'JCE / estudiante', data: jps.values, borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac), tension:0.3, pointRadius:3, borderWidth:2.5, spanGaps:true }] },
+    options: commonLineOpts({xTitle:'Año', yTitle:'JCE por estudiante'})
+  });
+}
+
+/* ---- Empleabilidad / Gratuidad ---- */
+function buildEmpleabilidadChart(emp){
+  const ctx = document.getElementById('chartEmpleabilidad');
+  const palette = shadesOf(accentColor(currentFac), Math.max(emp.filas.length,1));
+  charts.empleabilidad = new Chart(ctx, {
+    type:'line',
+    data:{ labels: emp.periodos, datasets: emp.filas.map((f,i)=>({
+      label: shortenName(f.nombre), data: f.valores, borderColor: palette[i], backgroundColor: palette[i],
+      tension:0.3, spanGaps:true, pointRadius:3, borderWidth:2.5
+    })) },
+    options: commonLineOpts({xTitle:'Cohorte de egreso', yTitle:'% empleabilidad', isPct:true})
+  });
+}
+function normalizeName(s){
+  return String(s).toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[().]/g,'')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function buildGratuidadChart(grat, selected){
+  const ctx = document.getElementById('chartGratuidad');
+  const years = grat.years;
+  const datasets = [
+    { label: 'Facultad', data: grat.facultad ? grat.facultad.valores : [], borderColor: '#B9B7AC', backgroundColor: '#B9B7AC', fill:false, tension:0.3, pointRadius:2.5, borderWidth:2, borderDash: selected ? [4,3] : [] }
+  ];
+  if(selected){
+    const match = (grat.carreras||[]).find(r => normalizeName(r.nombre)===normalizeName(selected.nombre));
+    if(match){
+      datasets.push({ label: shortenName(selected.nombre), data: match.valores, borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac)+'33', fill:true, tension:0.3, pointRadius:3, borderWidth:2.5 });
+    }
+  } else {
+    datasets[0].borderColor = accentColor(currentFac);
+    datasets[0].backgroundColor = accentColor(currentFac)+'33';
+    datasets[0].fill = true;
+    datasets[0].borderDash = [];
+  }
+  charts.gratuidad = new Chart(ctx, {
+    type:'line',
+    data:{ labels: years, datasets },
+    options: commonLineOpts({xTitle:'Año', yTitle:'% con gratuidad', isPct:true})
+  });
+}
+
+/* ---------------- Carreras table (pregrado) ---------------- */
+function buildCarrerasTable(carreras, selected){
+  const tbl = document.getElementById('tblCarreras');
+  let html = `<thead><tr>
+    <th>Carrera</th><th>Modalidad</th><th>Acreditación</th>
+    <th>Vigentes 2026</th><th>Nuevos 2026</th><th>Ocupación vac. 2026</th><th>Retención 1er año</th><th>Retención 3er año</th>
+  </tr></thead><tbody>`;
+  carreras.forEach(c=>{
+    const [retY, retV] = lastEntry(c.retencion_1er_anio);
+    const [ret3Y, ret3V] = lastEntry(c.retencion_3er_anio);
+    const vig2026 = c.vigentes ? c.vigentes['2026'] : null;
+    const nue2026 = c.nuevos ? c.nuevos['2026'] : null;
+    const ocu2026 = c.tasa_ocupacion ? c.tasa_ocupacion['2026'] : null;
+    const barPct = ocu2026!==null && ocu2026!==undefined ? Math.min(ocu2026*100,100) : 0;
+    const isSel = selected && selected.nombre===c.nombre;
+    html += `<tr class="${isSel?'selected-row':''}" data-carrera="${escapeHtml(c.nombre)}" style="cursor:pointer;">
+      <td class="name">${escapeHtml(c.nombre)}</td>
+      <td><span class="mod-badge">${c.modalidad || '—'}</span></td>
+      <td>${c.acreditacion_anios ? c.acreditacion_anios + ' años' : '—'}</td>
+      <td>${fmtInt(vig2026)}</td>
+      <td>${fmtInt(nue2026)}</td>
+      <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${barPct}%"></div></div>${fmtPct(ocu2026)}</div></td>
+      <td>${fmtPct(retV)} <span style="color:var(--ink-soft); font-size:10.5px;">${retY?('\''+String(retY).slice(2)):''}</span></td>
+      <td>${fmtPct(ret3V)} <span style="color:var(--ink-soft); font-size:10.5px;">${ret3Y?('\''+String(ret3Y).slice(2)):''}</span></td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+  if(carreras.length>1){
+    tbl.querySelectorAll('tbody tr').forEach(tr=>{
+      tr.addEventListener('click', ()=>{
+        const name = tr.getAttribute('data-carrera');
+        currentCarrera = (currentCarrera===name) ? null : name;
+        renderContent();
+      });
+    });
+  }
+}
+
+/* ================================================================
+   POSTGRADO
+   ================================================================ */
+const POST_YEARS = [2020,2021,2022,2023,2024,2025];
+
+function renderPostgradoTab(zone, post){
+  if(!post || !post.programas || !post.programas.length){
+    zone.innerHTML = `
+      <div class="empty-state">
+        <div class="stampbig">Sin registro</div>
+        <p>La Facultad de ${currentFac} no cuenta con programas de postgrado en el expediente consolidado. Los datos disponibles cubren únicamente formación de pregrado.</p>
+      </div>`;
+    return;
+  }
+  const total = post.total;
+  const programas = post.programas;
+
+  // Admisión y matrícula traen una columna adicional "a la fecha" del año en curso (2026,
+  // parcial) — el año 2025 es el último CERRADO, así que las tarjetas y variaciones usan
+  // ese año como referencia y el 2026 se muestra aparte, sin mezclarlo en los cálculos.
+  const closedY = 2025;
+  const [lastMatY, lastMatV] = lastEntry(total.matricula);
+  const [lastAdmY, lastAdmV] = lastEntry(total.admision);
+
+  const matV = total.matricula[String(closedY)];
+  const admV = total.admision[String(closedY)];
+  const vacV = total.vacantes[String(closedY)];
+
+  const [gtoY, gtoV] = lastEntry(total.graduacion_oportuna);
+  const [gttY, gttV] = lastEntry(total.graduacion_total);
+
+  const vigentes = programas.filter(p => p.matricula && p.matricula[String(closedY)]>0);
+  const nMagisterTotal = programas.filter(p => (p.grado||'').includes('Magíster') || (p.grado||'').includes('Magister')).length;
+  const nDoctoradoTotal = programas.filter(p => (p.grado||'').includes('Doctorado')).length;
+
+  const top = [...programas].sort((a,b)=>(b.matricula[String(closedY)]||0)-(a.matricula[String(closedY)]||0))[0];
+
+  const prevY = closedY - 1;
+  const nuevos = programas.filter(p => {
+    const prev = p.matricula ? p.matricula[String(prevY)] : null;
+    const cur = p.matricula ? p.matricula[String(closedY)] : null;
+    return (!prev || prev===0) && cur>0;
+  });
+
+  zone.innerHTML = `
+    <div class="estado-actual-title">
+      <span class="eyebrow-mini">Resumen ejecutivo</span>
+      <h3>Estado Actual</h3>
+    </div>
+    <div class="kpis" style="margin-bottom:22px;">
+      <div class="kpi" data-idx="pg1"><div class="lab">Programas de postgrado registrados</div><div class="val">${programas.length}</div>
+        <div class="delta flat">${nMagisterTotal} Magíster · ${nDoctoradoTotal} Doctorado</div>
+        <div class="kpi-note">${vigentes.length} con matrícula en ${closedY}</div>
+      </div>
+      <div class="kpi" data-idx="pg2"><div class="lab">Matrícula total ${closedY}</div><div class="val">${fmtInt(matV)}</div>
+        ${deltaBadge(yoyDeltaPct({[String(prevY)]: total.matricula[String(prevY)], [String(closedY)]: matV}))}
+        ${kpiBreakdown(programas, 'matricula', closedY, fmtInt)}
+        ${nuevos.length ? `<div class="kpi-note">Incluye ${nuevos.length} programa${nuevos.length>1?'s':''} nuevo${nuevos.length>1?'s':''} desde ${prevY} (antes en 0)</div>` : ''}
+        ${(lastMatY && lastMatY!==closedY) ? `<div class="kpi-note">${lastMatY} a la fecha: ${fmtInt(lastMatV)}</div>` : ''}
+      </div>
+      <div class="kpi" data-idx="pg3"><div class="lab">Admisión ${closedY}</div><div class="val">${fmtInt(admV)}</div>
+        ${deltaBadge(yoyDeltaPct({[String(prevY)]: total.admision[String(prevY)], [String(closedY)]: admV}))}
+        ${kpiBreakdown(programas, 'admision', closedY, fmtInt)}
+        ${(lastAdmY && lastAdmY!==closedY) ? `<div class="kpi-note">${lastAdmY} a la fecha: ${fmtInt(lastAdmV)}</div>` : ''}
+      </div>
+      <div class="kpi" data-idx="pg4"><div class="lab">Vacantes ${closedY}</div><div class="val">${fmtInt(vacV)}</div>
+        ${kpiBreakdown(programas, 'vacantes', closedY, fmtInt)}
+      </div>
+      <div class="kpi" data-idx="pg6"><div class="lab">Graduación oportuna</div><div class="val">${fmtPct(gtoV)}<span> cohorte ${gtoY||''}</span></div>
+        ${gtoY ? kpiBreakdown(programas, 'graduacion_oportuna', gtoY, fmtPct) : '<div class="kpi-note">Sin datos aún</div>'}
+      </div>
+      <div class="kpi" data-idx="pg7"><div class="lab">Graduación total</div><div class="val">${fmtPct(gttV)}<span> cohorte ${gttY||''}</span></div>
+        ${gttY ? kpiBreakdown(programas, 'graduacion_total', gttY, fmtPct) : '<div class="kpi-note">Sin datos aún</div>'}
+      </div>
+      <div class="kpi" data-idx="pg8"><div class="lab">Programa con mayor matrícula ${closedY}</div><div class="val" style="font-size:16px; line-height:1.3;">${top ? escapeHtml(shortenName(top.nombre, 40)) : '—'}</div>
+        <div class="delta flat">${top ? fmtInt(top.matricula[String(closedY)]) + ' matriculados' : ''}</div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="n">01</span><h3>Matrícula y admisión</h3><div class="line"></div></div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Matrícula total por año</h4><div class="note">Facultad completa · 2020–2025 (2026 en curso)</div><canvas id="chartPostTotal"></canvas></div>
+      <div class="card"><h4>Admisión vs. vacantes</h4><div class="note">Facultad completa, por año</div><canvas id="chartPostAdmVac"></canvas></div>
+    </div>
+
+    <div class="section-title"><span class="n">02</span><h3>Matrícula por programa</h3><div class="line"></div></div>
+    <div class="ledger-wrap"><table class="ledger" id="tblPostPrograma"></table></div>
+
+    <div class="section-title"><span class="n">03</span><h3>Distribución y graduación</h3><div class="line"></div></div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Distribución por programa ${closedY}</h4><div class="note">Participación sobre la matrícula del año</div><canvas id="chartPostDist"></canvas></div>
+      <div class="card"><h4>Graduación oportuna vs. total</h4><div class="note">Facultad completa, por cohorte de ingreso</div><canvas id="chartPostGraduacion"></canvas></div>
+    </div>
+
+    <div class="section-title"><span class="n">04</span><h3>Detalle por programa</h3><div class="line"></div></div>
+    <div class="ledger-wrap"><table class="ledger" id="tblPostgrado"></table></div>
+  `;
+
+  buildPostTotalChart(total);
+  buildPostAdmVacChart(total);
+  buildPostProgramaTable(programas);
+  buildPostDistChart(programas, closedY);
+  buildPostGraduacionChart(total);
+  buildPostgradoTable(programas, closedY);
+}
+
+function buildPostTotalChart(total){
+  const ctx = document.getElementById('chartPostTotal');
+  charts.postTotal = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: POST_YEARS, datasets:[
+      { label:'Matrícula', data: seriesFor(total.matricula, POST_YEARS), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }
+    ] },
+    options: commonBarOpts({xTitle:'Año', yTitle:'Matriculados'})
+  });
+}
+function buildPostAdmVacChart(total){
+  const ctx = document.getElementById('chartPostAdmVac');
+  charts.postAdmVac = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: POST_YEARS, datasets:[
+      { label:'Vacantes', data: seriesFor(total.vacantes, POST_YEARS), backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:26 },
+      { label:'Admisión', data: seriesFor(total.admision, POST_YEARS), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:26 },
+    ] },
+    options: commonBarOpts({xTitle:'Año', yTitle:'Estudiantes'})
+  });
+}
+function buildPostProgramaTable(programas){
+  const tbl = document.getElementById('tblPostPrograma');
+  let html = `<thead><tr><th>Programa</th>${POST_YEARS.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>`;
+  programas.forEach(p=>{
+    html += `<tr><td class="name">${escapeHtml(p.nombre)}</td>${POST_YEARS.map(y=>`<td>${fmtInt(p.matricula ? p.matricula[String(y)] : null)}</td>`).join('')}</tr>`;
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+function buildPostDistChart(programas, year){
+  const ctx = document.getElementById('chartPostDist');
+  const rows = programas.map(p=>({ nombre:p.nombre, v:(p.matricula && p.matricula[String(year)]) || 0 })).filter(r=>r.v>0);
+  const palette = categoricalPalette(rows.length);
+  charts.postDist = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels: rows.map(r=>shortenName(r.nombre)), datasets:[{ data: rows.map(r=>r.v), backgroundColor: palette, borderColor:'#fff', borderWidth:2 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:baseFont(), boxWidth:10, padding:8, font:{...baseFont(), size:10} } } },
+      cutout:'60%'
+    }
+  });
+}
+function buildPostGraduacionChart(total){
+  const ctx = document.getElementById('chartPostGraduacion');
+  const years = objYears(total.graduacion_total);
+  charts.postGraduacion = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: years, datasets:[
+      { label:'Graduación oportuna', data: seriesFor(total.graduacion_oportuna, years), backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:34 },
+      { label:'Graduación total', data: seriesFor(total.graduacion_total, years), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 },
+    ] },
+    options: commonBarOpts({xTitle:'Cohorte de ingreso', yTitle:'% graduados', isPct:true})
+  });
+}
+function buildPostgradoTable(programas, year){
+  let html = `<thead><tr>
+    <th>Programa</th><th>Grado</th><th>Modalidad</th><th>Creación</th><th>Acreditación</th>
+    <th>Admisión ${year}</th><th>Vacantes ${year}</th><th>Matrícula ${year}</th><th>Grad. oportuna</th><th>Grad. total</th>
+  </tr></thead><tbody>`;
+  programas.forEach(p=>{
+    const [,goV] = lastEntry(p.graduacion_oportuna);
+    const [,gtV] = lastEntry(p.graduacion_total);
+    html += `<tr>
+      <td class="name">${escapeHtml(p.nombre)}</td>
+      <td><span class="mod-badge">${escapeHtml((p.grado||'').replace(/^\d\.\s*/,''))}</span></td>
+      <td><span class="mod-badge">${escapeHtml((p.modalidad||'').replace(/^\d\.\s*/,''))}</span></td>
+      <td>${p.anio_creacion || '—'}</td>
+      <td>${p.acreditacion_anios ? p.acreditacion_anios + ' años' : '—'}</td>
+      <td>${fmtInt(p.admision ? p.admision[String(year)] : null)}</td>
+      <td>${fmtInt(p.vacantes ? p.vacantes[String(year)] : null)}</td>
+      <td>${fmtInt(p.matricula ? p.matricula[String(year)] : null)}</td>
+      <td>${fmtPct(goV)}</td>
+      <td>${fmtPct(gtV)}</td>
+    </tr>`;
+  });
+  html += '</tbody>';
+  document.getElementById('tblPostgrado').innerHTML = html;
+}
+
+/* ================================================================
+   EDUCACIÓN CONTINUA
+   ================================================================ */
+const EC_YEARS = [2024,2025,2026];
+
+function renderEducacionContinua(zone, ec){
+  if(!ec || !ec.programas || !ec.programas.length){
+    zone.innerHTML = `
+      <div class="empty-state">
+        <div class="stampbig">Sin registro</div>
+        <p>La Facultad de ${currentFac} no cuenta con oferta de Educación Continua (diplomados, postítulos o cursos) en el expediente consolidado.</p>
+      </div>`;
+    return;
+  }
+
+  const total = ec.total;
+  const programas = ec.programas;
+
+  // Igual que en Postgrado: 2026 aparece "a la fecha" (16-08-2026); 2025 es el último año cerrado.
+  const closedY = 2025;
+  const prevY = closedY - 1;
+  const [lastMatY, lastMatV] = lastEntry(total.matricula);
+  const matV = total.matricula[String(closedY)];
+
+  const vigentes = programas.filter(p => p.matricula && p.matricula[String(closedY)]>0);
+  const top = [...programas].sort((a,b)=>(b.matricula[String(closedY)]||0)-(a.matricula[String(closedY)]||0))[0];
+
+  const nuevos = programas.filter(p => {
+    const prev = p.matricula ? p.matricula[String(prevY)] : null;
+    const cur = p.matricula ? p.matricula[String(closedY)] : null;
+    return (!prev || prev===0) && cur>0;
+  });
+
+  zone.innerHTML = `
+    <div class="estado-actual-title">
+      <span class="eyebrow-mini">Resumen ejecutivo</span>
+      <h3>Estado Actual</h3>
+    </div>
+    <div class="kpis" style="margin-bottom:22px;">
+      <div class="kpi" data-idx="ec1"><div class="lab">Diplomados y postítulos registrados</div><div class="val">${programas.length}</div>
+        <div class="delta flat">${vigentes.length} con matrícula en ${closedY}</div>
+      </div>
+      <div class="kpi" data-idx="ec2"><div class="lab">Matriculados ${closedY}</div><div class="val">${fmtInt(matV)}</div>
+        ${deltaBadge(yoyDeltaPct({[String(prevY)]: total.matricula[String(prevY)], [String(closedY)]: matV}))}
+        ${nuevos.length ? `<div class="kpi-note">Incluye ${nuevos.length} programa${nuevos.length>1?'s':''} nuevo${nuevos.length>1?'s':''} desde ${prevY} (antes en 0)</div>` : ''}
+        ${(lastMatY && lastMatY!==closedY) ? `<div class="kpi-note">${lastMatY} a la fecha: ${fmtInt(lastMatV)}</div>` : ''}
+      </div>
+      <div class="kpi" data-idx="ec3"><div class="lab">Programa con mayor matrícula ${closedY}</div><div class="val" style="font-size:16px; line-height:1.3;">${top ? escapeHtml(shortenName(top.nombre, 40)) : '—'}</div>
+        <div class="delta flat">${top ? fmtInt(top.matricula[String(closedY)]) + ' matriculados' : ''}</div>
+      </div>
+    </div>
+
+    <div class="section-title"><span class="n">01</span><h3>Matrícula por año</h3><div class="line"></div></div>
+    <div class="chart-grid thirds">
+      <div class="card"><h4>Matrícula total por año</h4><div class="note">Facultad completa · 2024–2025 (2026 en curso)</div><canvas id="chartEcTotal"></canvas></div>
+      <div class="card"><h4>Distribución por programa ${closedY}</h4><div class="note">Participación sobre la matrícula del año</div><canvas id="chartEcDist"></canvas></div>
+    </div>
+
+    <div class="section-title"><span class="n">02</span><h3>Matrícula por programa</h3><div class="line"></div></div>
+    <div class="ledger-wrap"><table class="ledger" id="tblEcPrograma"></table></div>
+    <div class="note" style="margin-top:8px; font-size:11px;">Diplomados y postítulos registrados en el período. "Con matrícula ${closedY}" indica matrícula mayor a cero ese año; los demás se dictaron en otros años del período pero no en ${closedY}. Matrícula ${EC_YEARS[EC_YEARS.length-1]} al 16-08-2026 (año en curso).</div>
+  `;
+
+  buildEcTotalChart(total);
+  buildEcDistChart(programas, closedY);
+  buildEcProgramaTable(programas, closedY);
+}
+
+function buildEcTotalChart(total){
+  const ctx = document.getElementById('chartEcTotal');
+  charts.ecTotal = new Chart(ctx, {
+    type:'bar',
+    data:{ labels: EC_YEARS, datasets:[
+      { label:'Matriculados', data: seriesFor(total.matricula, EC_YEARS), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }
+    ] },
+    options: commonBarOpts({xTitle:'Año', yTitle:'Matriculados'})
+  });
+}
+function buildEcDistChart(programas, year){
+  const ctx = document.getElementById('chartEcDist');
+  const rows = programas.map(p=>({ nombre:p.nombre, v:(p.matricula && p.matricula[String(year)]) || 0 })).filter(r=>r.v>0);
+  const palette = categoricalPalette(rows.length);
+  charts.ecDist = new Chart(ctx, {
+    type:'doughnut',
+    data:{ labels: rows.map(r=>shortenName(r.nombre)), datasets:[{ data: rows.map(r=>r.v), backgroundColor: palette, borderColor:'#fff', borderWidth:2 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ position:'bottom', labels:{ font:baseFont(), boxWidth:10, padding:8, font:{...baseFont(), size:10} } } },
+      cutout:'60%'
+    }
+  });
+}
+function buildEcProgramaTable(programas, closedY){
+  const tbl = document.getElementById('tblEcPrograma');
+  let html = `<thead><tr><th>Programa</th><th>Estado</th>${EC_YEARS.map(y=>`<th>${y}</th>`).join('')}</tr></thead><tbody>`;
+  programas.forEach(p=>{
+    const activo = (p.matricula && p.matricula[String(closedY)] > 0);
+    const badge = activo
+      ? `<span class="mod-badge status-active">Con matrícula ${closedY}</span>`
+      : `<span class="mod-badge">Sin matrícula ${closedY}</span>`;
+    html += `<tr class="${activo ? '' : 'row-muted'}"><td class="name">${escapeHtml(p.nombre)}</td><td>${badge}</td>${EC_YEARS.map(y=>`<td>${fmtInt(p.matricula ? p.matricula[String(y)] : null)}</td>`).join('')}</tr>`;
+  });
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+/* ================================================================
+   INVESTIGACIÓN
+   ================================================================ */
+function renderInvestigacion(zone, inv){
+  if(!inv || !inv.tipos || !inv.tipos.length){
+    zone.innerHTML = `
+      <div class="empty-state">
+        <div class="stampbig">Sin registro</div>
+        <p>La Facultad de ${currentFac} no cuenta con datos de investigación en el expediente consolidado.</p>
+      </div>`;
+    return;
+  }
+
+  const tipos = inv.tipos;
+  const INV_YEARS = objYears(inv.total);
+  const closedY = Math.max(...INV_YEARS);
+  const prevY = closedY - 1;
+  const grandTotal = INV_YEARS.reduce((s,y)=>s+(inv.total[String(y)]||0), 0);
+
+  const tipoTotal = t => Object.values(t.valores).reduce((s,v)=>s+v, 0);
+  const top = [...tipos].sort((a,b)=>tipoTotal(b)-tipoTotal(a))[0];
+
+  const vig = inv.vigentes;
+  const hasVig = !!(vig && vig.tipos && vig.tipos.length);
+  const VIG_YEARS = hasVig ? objYears(vig.total) : [];
+  const closedYVig = hasVig ? Math.max(...VIG_YEARS) : null;
+  const prevYVig = closedYVig - 1;
+
+  zone.innerHTML = `
+    <div class="estado-actual-title">
+      <span class="eyebrow-mini">Resumen ejecutivo</span>
+      <h3>Estado Actual</h3>
+    </div>
+    <div class="kpis" style="margin-bottom:22px;">
+      <div class="kpi" data-idx="inv1"><div class="lab">Proyectos adjudicados ${INV_YEARS[0]}–${closedY}</div><div class="val">${fmtInt(grandTotal)}</div>
+        <div class="delta flat">Todas las fuentes de financiamiento</div>
+      </div>
+      <div class="kpi" data-idx="inv2"><div class="lab">Proyectos adjudicados ${closedY}</div><div class="val">${fmtInt(inv.total[String(closedY)])}</div>
+        ${deltaBadge(yoyDeltaPct({[String(prevY)]: inv.total[String(prevY)], [String(closedY)]: inv.total[String(closedY)]}))}
+      </div>
+      <div class="kpi" data-idx="inv3"><div class="lab">Fuente principal</div><div class="val" style="font-size:18px;">${escapeHtml(top.nombre)}</div>
+        <div class="delta flat">${fmtInt(tipoTotal(top))} proyectos adjudicados en el período</div>
+      </div>
+      ${hasVig ? `<div class="kpi" data-idx="inv4"><div class="lab">Proyectos vigentes ${closedYVig}</div><div class="val">${fmtInt(vig.total[String(closedYVig)])}</div>
+        ${deltaBadge(yoyDeltaPct({[String(prevYVig)]: vig.total[String(prevYVig)], [String(closedYVig)]: vig.total[String(closedYVig)]}))}
+        <div class="kpi-note">En ejecución ese año, incluye proyectos adjudicados en años previos</div>
+      </div>` : ''}
+    </div>
+
+    <div class="section-title"><span class="n">01</span><h3>Proyectos adjudicados por año</h3><div class="line"></div></div>
+    <div class="card tall" style="margin-bottom:18px;"><h4>Proyectos adjudicados por tipo y año</h4><div class="note">Cantidad de proyectos nuevos adjudicados ese año, por fuente de financiamiento</div><canvas id="chartInvTipos"></canvas></div>
+
+    <div class="section-title"><span class="n">02</span><h3>Detalle de proyectos adjudicados por tipo</h3><div class="line"></div></div>
+    <div class="ledger-wrap"><table class="ledger" id="tblInvTipos"></table></div>
+
+    ${hasVig ? `
+    <div class="section-title"><span class="n">03</span><h3>Proyectos vigentes por año</h3><div class="line"></div></div>
+    <div class="note" style="margin:-6px 0 14px; font-size:12px;">Proyectos en ejecución cada año (incluye proyectos plurianuales adjudicados en años anteriores), a diferencia de los proyectos adjudicados que solo cuentan los nuevos.</div>
+    <div class="card tall" style="margin-bottom:18px;"><h4>Proyectos vigentes por tipo y año</h4><div class="note">Cantidad de proyectos en ejecución, por fuente de financiamiento</div><canvas id="chartInvVigentes"></canvas></div>
+
+    <div class="section-title"><span class="n">04</span><h3>Detalle de proyectos vigentes por tipo</h3><div class="line"></div></div>
+    <div class="ledger-wrap"><table class="ledger" id="tblInvVigentes"></table></div>` : ''}
+  `;
+
+  buildInvChart(tipos, INV_YEARS);
+  buildInvTable(tipos, INV_YEARS, inv.total);
+  if(hasVig){
+    buildInvChart(vig.tipos, VIG_YEARS, 'chartInvVigentes');
+    buildInvTable(vig.tipos, VIG_YEARS, vig.total, 'tblInvVigentes', 'Promedio', true);
+  }
+}
+
+function buildInvChart(tipos, years, elId){
+  elId = elId || 'chartInvTipos';
+  const key = elId;
+  const ctx = document.getElementById(elId);
+  const palette = categoricalPalette(tipos.length);
+  charts[key] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: years,
+      datasets: tipos.map((t,i)=>({
+        label: t.nombre,
+        data: years.map(y => t.valores[String(y)] ?? 0),
+        backgroundColor: palette[i],
+        borderRadius: 3,
+        maxBarThickness: 40,
+      }))
+    },
+    options: commonBarOpts({xTitle:'Año', yTitle:'N° de proyectos', stacked:true})
+  });
+}
+
+function buildInvTable(tipos, years, total, elId, colLabel, isAverage){
+  elId = elId || 'tblInvTipos';
+  colLabel = colLabel || 'Total';
+  const tbl = document.getElementById(elId);
+  const rowAgg = t => {
+    const vals = Object.values(t.valores);
+    const sum = vals.reduce((s,v)=>s+v, 0);
+    return isAverage ? (sum / vals.length) : sum;
+  };
+  const fmtAgg = isAverage ? fmtNum1 : fmtInt;
+  let html = `<thead><tr><th>Tipo de Proyecto</th>${years.map(y=>`<th>${y}</th>`).join('')}<th>${colLabel}</th></tr></thead><tbody>`;
+  tipos.forEach(t=>{
+    html += `<tr><td class="name">${escapeHtml(t.nombre)}</td>${years.map(y=>`<td>${fmtInt(t.valores[String(y)] ?? 0)}</td>`).join('')}<td><strong>${fmtAgg(rowAgg(t))}</strong></td></tr>`;
+  });
+  const totalVals = years.map(y=>total[String(y)] ?? 0);
+  const totalAgg = isAverage ? (totalVals.reduce((s,v)=>s+v,0) / totalVals.length) : totalVals.reduce((s,v)=>s+v,0);
+  html += `<tr class="selected-row"><td class="name"><strong>Total</strong></td>${years.map(y=>`<td><strong>${fmtInt(total[String(y)] ?? 0)}</strong></td>`).join('')}<td><strong>${fmtAgg(totalAgg)}</strong></td></tr>`;
+  html += '</tbody>';
+  tbl.innerHTML = html;
+}
+
+/* ---------------- Init ---------------- */
+render();
+
+
+</script>
+</body>
+</html>
