@@ -861,8 +861,8 @@ function renderPregrado(zone, pg){
       <div class="card"><h4>Vacantes vs. nuevos por año</h4><div class="note">Comparación directa${selected ? scopeSuffix : ', Facultad completa'}. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas></div>
     </div>
     ${hasAltPeriods ? `
-    <div class="section-title"><span class="n">02b</span><h3>Complemento — admisión en otros períodos</h3><div class="line"></div></div>
-    <div class="note" style="margin:-6px 0 14px; font-size:12px;">Algunas carreras ofrecen vacantes fuera del 1er semestre (2do semestre, 1er y 3er trimestre). Se muestra como complemento a la ocupación de 1er semestre.</div>
+    <div class="section-title"><span class="n">02b</span><h3>Complemento — Admisión en otros períodos</h3><div class="line"></div></div>
+    <div class="note" style="margin:-6px 0 14px; font-size:12px;">Algunas carreras ofrecen vacantes o tienen matriculados fuera del 1er semestre. Como no se consideran en el cálculo de ocupación de vacantes indicado mas arriba, se muestran acá como complemento a esa cifra.</div>
     <div class="chart-grid thirds">
       <div class="card"><h4>Vacantes vs. matriculados en otros períodos</h4><div class="note">${selected ? scopeSuffix.replace(' — ','') : 'Suma Facultad'}: 2do sem., 1er y 3er trimestre</div><canvas id="chartPeriodos"></canvas></div>
       <div class="card">
