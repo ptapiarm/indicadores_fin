@@ -897,7 +897,7 @@ function renderPregrado(zone, pg){
     <div class="chart-grid thirds3">
       <div class="card"><h4>Honorarios, planta y total</h4><div class="note">N° de docentes por tipo de contrato y año</div><canvas id="chartPlanta"></canvas></div>
       <div class="card"><h4>JCE por jerarquía</h4><div class="note">Distribución por año</div><canvas id="chartJCE"></canvas></div>
-      <div class="card">${hasJCEStudent ? '<h4>JCE por estudiante</h4><div class="note">Jornadas completas equivalentes / matrícula</div><canvas id="chartJCEStudent"></canvas>' : '<h4>JCE por estudiante</h4>'+emptyMini('Sin datos disponibles')}</div>
+      <div class="card">${hasJCEStudent ? '<h4>Estudiantes por JCE</h4><div class="note">Matrícula vigente / Jornadas completas equivalentes</div><canvas id="chartJCEStudent"></canvas>' : '<h4>Estudiantes por JCE</h4>'+emptyMini('Sin datos disponibles')}</div>
     </div>
 
     <div class="section-title"><span class="n">06</span><h3>Empleabilidad y gratuidad</h3><div class="line"></div></div>
@@ -1116,8 +1116,8 @@ function buildJCEStudentChart(jps){
   const ctx = document.getElementById('chartJCEStudent');
   charts.jceStudent = new Chart(ctx, {
     type:'line',
-    data:{ labels: jps.years, datasets:[{ label:'JCE / estudiante', data: jps.values, borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac), tension:0.3, pointRadius:3, borderWidth:2.5, spanGaps:true }] },
-    options: commonLineOpts({xTitle:'Año', yTitle:'JCE por estudiante'})
+    data:{ labels: jps.years, datasets:[{ label:'Estudiantes / JCE', data: jps.values, borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac), tension:0.3, pointRadius:3, borderWidth:2.5, spanGaps:true }] },
+    options: commonLineOpts({xTitle:'Año', yTitle:'Estudiantes por JCE'})
   });
 }
 
