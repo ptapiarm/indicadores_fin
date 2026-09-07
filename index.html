@@ -435,6 +435,37 @@
 </style>
 </head>
 <body>
+<div id="passGate" style="position:fixed; inset:0; background:#ecebe5; z-index:9999; display:flex; align-items:center; justify-content:center; font-family:inherit;">
+  <div style="background:#fff; border-radius:14px; padding:36px 40px; box-shadow:0 8px 30px rgba(0,0,0,0.12); width:320px; text-align:center;">
+    <h2 style="margin:0 0 6px; font-size:18px;">Facultad de Ingeniería</h2>
+    <div style="font-size:13px; color:#7A7768; margin-bottom:20px;">Ingresa la clave para ver el panel</div>
+    <input id="passInput" type="password" placeholder="Clave de acceso" style="width:100%; box-sizing:border-box; padding:10px 12px; border:1px solid #ddd; border-radius:8px; font-size:14px; margin-bottom:12px;">
+    <button id="passBtn" style="width:100%; padding:10px 12px; border:none; border-radius:8px; background:#FF6F43; color:#fff; font-weight:600; font-size:14px; cursor:pointer;">Entrar</button>
+    <div id="passError" style="color:#c0392b; font-size:12px; margin-top:10px; display:none;">Clave incorrecta, intenta de nuevo.</div>
+  </div>
+</div>
+<script>
+(function(){
+  var PANEL_PASSWORD = "UAH_Fin2026"; // cámbiala aquí
+  var gate = document.getElementById('passGate');
+  var input = document.getElementById('passInput');
+  var btn = document.getElementById('passBtn');
+  var err = document.getElementById('passError');
+  document.addEventListener('DOMContentLoaded', function(){
+    document.querySelector('.wrap').style.display = 'none';
+  });
+  function tryUnlock(){
+    if(input.value === PANEL_PASSWORD){
+      gate.style.display = 'none';
+      document.querySelector('.wrap').style.display = '';
+    } else {
+      err.style.display = 'block';
+    }
+  }
+  btn.addEventListener('click', tryUnlock);
+  input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
+})();
+</script>
 <div class="wrap">
 
   <div class="masthead">
@@ -854,11 +885,13 @@ function renderPregrado(zone, pg){
 
     <div class="section-title"><span class="n">01</span><h3>Matrícula Total</h3><div class="line"></div></div>
     <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente${scopeSuffix}</h4><div class="note">Total vigentes al 30 de abril de cada año${(!selected && carreras.length>1) ? ', por carrera' : ''}</div><canvas id="chartVigentes"></canvas></div>
+    <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente — Total Facultad</h4><div class="note">Suma de todas las carreras, total vigentes al 30 de abril de cada año</div><canvas id="chartVigentesTotal"></canvas></div>
+    <div class="card tall" style="margin-bottom:18px;">${hasGratuidad ? '<h4>% Estudiantes con gratuidad'+scopeSuffix+'</h4><div class="note">Por cohorte, información DAE</div><canvas id="chartGratuidad"></canvas>' : '<h4>% Estudiantes con gratuidad</h4>'+emptyMini('Sin datos disponibles')}</div>
 
     <div class="section-title"><span class="n">02</span><h3>Ocupación de vacantes — 1er semestre</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
       <div class="card"><h4>Tasa de ocupación de vacantes</h4><div class="note">% de vacantes cubiertas, línea de 100% como referencia. No considera Conducencias ni PACE.</div><canvas id="chartOcupacion"></canvas></div>
-      <div class="card"><h4>Vacantes vs. nuevos por año</h4><div class="note">Comparación directa${selected ? scopeSuffix : ', Facultad completa'}. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas></div>
+      <div class="card"><h4>Vacantes vs. Estudiantes nuevos por año</h4><div class="note">Comparación directa${selected ? scopeSuffix : ', Facultad completa'}. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas></div>
     </div>
     ${hasAltPeriods ? `
     <div class="section-title"><span class="n">02b</span><h3>Complemento — Admisión en otros períodos</h3><div class="line"></div></div>
@@ -877,7 +910,7 @@ function renderPregrado(zone, pg){
       <div class="card"><h4>Retención al 3er año</h4><div class="note">${hasRet3 ? '% de estudiantes que continúan tras el tercer año' : 'Sin datos disponibles'}</div>${hasRet3 ? '<canvas id="chartRetencion3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
     </div>
 
-    ${hasGenero ? `
+    ${(hasGenero && !selected) ? `
     <div class="section-title"><span class="n">03b</span><h3>Composición por género</h3><div class="line"></div></div>
     <div class="note" style="margin:-6px 0 14px; font-size:12px;">Matrícula y retención por género. Dato a nivel de Facultad.</div>
     <div class="chart-grid thirds">
@@ -891,22 +924,17 @@ function renderPregrado(zone, pg){
       <div class="card"><h4>Titulación oportuna</h4><div class="note">${hasTitOp ? '% titulados en el tiempo formal de la carrera, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitOp ? '<canvas id="chartTitOportuna"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
       <div class="card"><h4>Titulación total</h4><div class="note">${hasTitTot ? '% titulados en total (con rezago), por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitTot ? '<canvas id="chartTitTotal"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
     </div>
+    ${!selected ? `<div class="card tall" style="margin-top:18px;">${hasEmpleabilidad ? '<h4>Empleabilidad (Fuente Sies)</h4><div class="note">'+escapeHtml(pg.empleabilidad.descriptor||'')+', por cohorte de egreso</div><canvas id="chartEmpleabilidad"></canvas>' : '<h4>Empleabilidad (Fuente Sies)</h4>'+emptyMini('Sin datos de empleabilidad Sies para esta Facultad')}</div>` : ''}
 
+    ${!selected ? `
     <div class="section-title"><span class="n">05</span><h3>Planta docente y jornadas académicas</h3><div class="line"></div></div>
-    ${selected ? `<div class="note" style="margin:-10px 0 14px; font-size:12px;">La planta docente y JCE solo existen a nivel de Facultad completa en el Excel; no varían al filtrar por carrera.</div>` : ''}
     <div class="chart-grid thirds3">
       <div class="card"><h4>Honorarios, planta y total</h4><div class="note">N° de docentes por tipo de contrato y año</div><canvas id="chartPlanta"></canvas></div>
       <div class="card"><h4>JCE por jerarquía</h4><div class="note">Distribución por año</div><canvas id="chartJCE"></canvas></div>
       <div class="card">${hasJCEStudent ? '<h4>Estudiantes por JCE</h4><div class="note">Matrícula vigente / Jornadas completas equivalentes</div><canvas id="chartJCEStudent"></canvas>' : '<h4>Estudiantes por JCE</h4>'+emptyMini('Sin datos disponibles')}</div>
-    </div>
+    </div>` : ''}
 
-    <div class="section-title"><span class="n">06</span><h3>Empleabilidad y gratuidad</h3><div class="line"></div></div>
-    <div class="chart-grid">
-      <div class="card tall">${hasEmpleabilidad ? '<h4>Empleabilidad (Fuente Sies)</h4><div class="note">'+escapeHtml(pg.empleabilidad.descriptor||'')+', por cohorte de egreso</div><canvas id="chartEmpleabilidad"></canvas>' : '<h4>Empleabilidad (Fuente Sies)</h4>'+emptyMini('Sin datos de empleabilidad Sies para esta Facultad')}</div>
-      <div class="card tall">${hasGratuidad ? '<h4>% Estudiantes con gratuidad'+scopeSuffix+'</h4><div class="note">Por cohorte, información DAE</div><canvas id="chartGratuidad"></canvas>' : '<h4>% Estudiantes con gratuidad</h4>'+emptyMini('Sin datos disponibles')}</div>
-    </div>
-
-    <div class="section-title"><span class="n">07</span><h3>Detalle por carrera</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">06</span><h3>Detalle por carrera</h3><div class="line"></div></div>
     <div class="ledger-wrap"><table class="ledger" id="tblCarreras"></table></div>
     <div class="note" style="margin-top:8px; font-size:11px;">* La ocupación de vacantes no considera Conducencias ni PACE. Para las carreras con Ingreso DEMRE, la tasa se calcula Matriculados Demre/Vacantes Ofrecidas. Para carreras con ingreso diferente a DEMRE, se calcula (Matriculados Ingreso Especial + Matriculados Ingreso Complementario)/Vacantes Ofrecidas.</div>
   `;
@@ -917,20 +945,23 @@ function renderPregrado(zone, pg){
   buildOcupacionChart(dataSource);
   buildVacNuevosCompChart(dataSource);
   if(hasAltPeriods){ buildPeriodosChart(periodosCarreras); buildPeriodosTable(periodosCarreras); }
-  buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5));
-  if(hasRet3) buildRetencionGenericChart('chartRetencion3', dataSource.retencion_3er_anio, objYears(dataSource.retencion_3er_anio));
-  if(hasGenero){
+  buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5), RETENCION_INSTITUCIONAL_1ER, selected);
+  if(hasRet3) buildRetencionGenericChart('chartRetencion3', dataSource.retencion_3er_anio, objYears(dataSource.retencion_3er_anio), RETENCION_INSTITUCIONAL_3ER, selected);
+  if(hasGenero && !selected){
     buildGeneroLineChart('chartGeneroMatricula', pg.genero.matricula_mujer, pg.genero.matricula_hombre, objYears(pg.genero.matricula_mujer), 'Año', '% de matrícula');
     buildGeneroLineChart('chartGeneroRet1', pg.genero.retencion_1er_mujer, pg.genero.retencion_1er_hombre, objYears(pg.genero.retencion_1er_mujer), 'Cohorte de ingreso', '% de retención');
     if(hasGenero3er) buildGeneroLineChart('chartGeneroRet3', pg.genero.retencion_3er_mujer, pg.genero.retencion_3er_hombre, objYears(pg.genero.retencion_3er_mujer), 'Cohorte de ingreso', '% de retención');
   }
   if(hasTitOp) buildTitulacionChart('chartTitOportuna', dataSource.titulacion_oportuna);
   if(hasTitTot) buildTitulacionChart('chartTitTotal', dataSource.titulacion_total);
-  buildPlantaChart(pg.planta_docente);
-  buildJCEChart(pg.jce);
-  if(hasJCEStudent) buildJCEStudentChart(pg.jce_per_student);
-  if(hasEmpleabilidad) buildEmpleabilidadChart(pg.empleabilidad);
+  if(!selected){
+    buildPlantaChart(pg.planta_docente);
+    buildJCEChart(pg.jce);
+    if(hasJCEStudent) buildJCEStudentChart(pg.jce_per_student);
+  }
+  if(hasEmpleabilidad && !selected) buildEmpleabilidadChart(pg.empleabilidad);
   if(hasGratuidad) buildGratuidadChart(pg.gratuidad, selected);
+  buildVigentesTotalChart(pg.total_facultad);
   buildCarrerasTable(carreras, selected);
 }
 
@@ -950,7 +981,7 @@ function buildVigentesChart(carreras, selected){
         borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac)+'33',
         fill:true, tension:0.35, spanGaps:true, pointRadius:3, borderWidth:2.5,
       }] },
-      options: commonLineOpts({xTitle:'Año', yTitle:'Matriculados'})
+      options: commonLineOpts({xTitle:'Año Académico', yTitle:'Matriculados'})
     });
     return;
   }
@@ -966,7 +997,20 @@ function buildVigentesChart(carreras, selected){
     borderColor: palette[i], backgroundColor: palette[i],
     tension:0.35, spanGaps:true, pointRadius:2.5, borderWidth:2,
   }));
-  charts.vigentes = new Chart(ctx, { type:'line', data:{ labels:YEARS, datasets }, options: commonLineOpts({xTitle:'Año', yTitle:'Matriculados'}) });
+  charts.vigentes = new Chart(ctx, { type:'line', data:{ labels:YEARS, datasets }, options: commonLineOpts({xTitle:'Año Académico', yTitle:'Matriculados'}) });
+}
+function buildVigentesTotalChart(totalFacultad){
+  const ctx = document.getElementById('chartVigentesTotal');
+  charts.vigentesTotal = new Chart(ctx, {
+    type:'line',
+    data:{ labels: YEARS, datasets:[{
+      label: 'Total Facultad',
+      data: seriesFor(totalFacultad.vigentes, YEARS),
+      borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac)+'33',
+      fill:true, tension:0.35, spanGaps:true, pointRadius:3, borderWidth:2.5,
+    }] },
+    options: commonLineOpts({xTitle:'Año Académico', yTitle:'Matriculados'})
+  });
 }
 function buildOcupacionChart(totals){
   const ctx = document.getElementById('chartOcupacion');
@@ -977,7 +1021,7 @@ function buildOcupacionChart(totals){
       { label:'Ocupación', data, borderColor:accentColor(currentFac), backgroundColor:accentColor(currentFac)+'33', fill:true, tension:0.3, pointRadius:3, borderWidth:2.5, spanGaps:true },
       { label:'100% referencia', data:YEARS.map(()=>1), borderColor:'rgba(0,0,0,0.35)', borderDash:[4,4], pointRadius:0, borderWidth:1 }
     ]},
-    options: commonLineOpts({xTitle:'Año', yTitle:'% de vacantes cubiertas', isPct:true})
+    options: commonLineOpts({xTitle:'Cohorte', yTitle:'% de vacantes cubiertas', isPct:true})
   });
 }
 function buildVacNuevosCompChart(totals){
@@ -1008,7 +1052,7 @@ function buildPeriodosChart(carreras){
       { label:'Vacantes ofrecidas', data: YEARS.map(y=>sumAcrossCarreras(carreras,'vac_otros_ofrecidas',y)), backgroundColor: '#D9D7CC', borderRadius:4, maxBarThickness:26 },
       { label:'Matriculados', data: YEARS.map(matriculadosPorAnio), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:26 },
     ]},
-    options: commonBarOpts({xTitle:'Año', yTitle:'Estudiantes'})
+    options: commonBarOpts({xTitle:'Año Académico', yTitle:'Estudiantes'})
   });
 }
 function buildPeriodosTable(carreras){
@@ -1048,12 +1092,19 @@ function buildPeriodosTable(carreras){
 }
 
 /* ---- Retención genérica (1er / 3er año) ---- */
-function buildRetencionGenericChart(elId, obj, years){
+const RETENCION_INSTITUCIONAL_1ER = { 2021:0.83, 2022:0.82, 2023:0.83, 2024:0.82, 2025:0.85 };
+const RETENCION_INSTITUCIONAL_3ER = { 2019:0.71, 2020:0.70, 2021:0.68, 2022:0.68, 2023:0.68 };
+function buildRetencionGenericChart(elId, obj, years, institucional, selected){
   const ctx = document.getElementById(elId);
   const data = seriesFor(obj, years);
+  const ownLabel = selected ? 'Retención Carrera' : 'Retención Facultad';
+  const datasets = [{ label: ownLabel, data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }];
+  if(institucional){
+    datasets.push({ label:'Retención Institucional', data: seriesFor(institucional, years), backgroundColor:'#B9B7AC', borderRadius:4, maxBarThickness:34 });
+  }
   charts[elId] = new Chart(ctx, {
     type:'bar',
-    data:{ labels:years, datasets:[{ label:'Retención', data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }] },
+    data:{ labels:years, datasets },
     options: commonBarOpts({xTitle:'Cohorte de ingreso', yTitle:'% de retención', isPct:true})
   });
 }
@@ -1232,7 +1283,6 @@ function renderPostgradoTab(zone, post){
   const admV = total.admision[String(closedY)];
   const vacV = total.vacantes[String(closedY)];
 
-  const [gtoY, gtoV] = lastEntry(total.graduacion_oportuna);
   const [gttY, gttV] = lastEntry(total.graduacion_total);
 
   const vigentes = programas.filter(p => p.matricula && p.matricula[String(closedY)]>0);
@@ -1272,9 +1322,6 @@ function renderPostgradoTab(zone, post){
       <div class="kpi" data-idx="pg4"><div class="lab">Vacantes ${closedY}</div><div class="val">${fmtInt(vacV)}</div>
         ${kpiBreakdown(programas, 'vacantes', closedY, fmtInt)}
       </div>
-      <div class="kpi" data-idx="pg6"><div class="lab">Graduación oportuna</div><div class="val">${fmtPct(gtoV)}<span> cohorte ${gtoY||''}</span></div>
-        ${gtoY ? kpiBreakdown(programas, 'graduacion_oportuna', gtoY, fmtPct) : '<div class="kpi-note">Sin datos aún</div>'}
-      </div>
       <div class="kpi" data-idx="pg7"><div class="lab">Graduación total</div><div class="val">${fmtPct(gttV)}<span> cohorte ${gttY||''}</span></div>
         ${gttY ? kpiBreakdown(programas, 'graduacion_total', gttY, fmtPct) : '<div class="kpi-note">Sin datos aún</div>'}
       </div>
@@ -1295,7 +1342,7 @@ function renderPostgradoTab(zone, post){
     <div class="section-title"><span class="n">03</span><h3>Distribución y graduación</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
       <div class="card"><h4>Distribución por programa ${closedY}</h4><div class="note">Participación sobre la matrícula del año</div><canvas id="chartPostDist"></canvas></div>
-      <div class="card"><h4>Graduación oportuna vs. total</h4><div class="note">Facultad completa, por cohorte de ingreso</div><canvas id="chartPostGraduacion"></canvas></div>
+      <div class="card"><h4>Graduación total</h4><div class="note">Facultad completa, por cohorte de ingreso</div><canvas id="chartPostGraduacion"></canvas></div>
     </div>
 
     <div class="section-title"><span class="n">04</span><h3>Detalle por programa</h3><div class="line"></div></div>
@@ -1360,7 +1407,6 @@ function buildPostGraduacionChart(total){
   charts.postGraduacion = new Chart(ctx, {
     type:'bar',
     data:{ labels: years, datasets:[
-      { label:'Graduación oportuna', data: seriesFor(total.graduacion_oportuna, years), backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:34 },
       { label:'Graduación total', data: seriesFor(total.graduacion_total, years), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 },
     ] },
     options: commonBarOpts({xTitle:'Cohorte de ingreso', yTitle:'% graduados', isPct:true})
@@ -1369,10 +1415,9 @@ function buildPostGraduacionChart(total){
 function buildPostgradoTable(programas, year){
   let html = `<thead><tr>
     <th>Programa</th><th>Grado</th><th>Modalidad</th><th>Creación</th><th>Acreditación</th>
-    <th>Admisión ${year}</th><th>Vacantes ${year}</th><th>Matrícula ${year}</th><th>Grad. oportuna</th><th>Grad. total</th>
+    <th>Admisión ${year}</th><th>Vacantes ${year}</th><th>Matrícula ${year}</th><th>Grad. total</th>
   </tr></thead><tbody>`;
   programas.forEach(p=>{
-    const [,goV] = lastEntry(p.graduacion_oportuna);
     const [,gtV] = lastEntry(p.graduacion_total);
     html += `<tr>
       <td class="name">${escapeHtml(p.nombre)}</td>
@@ -1383,7 +1428,6 @@ function buildPostgradoTable(programas, year){
       <td>${fmtInt(p.admision ? p.admision[String(year)] : null)}</td>
       <td>${fmtInt(p.vacantes ? p.vacantes[String(year)] : null)}</td>
       <td>${fmtInt(p.matricula ? p.matricula[String(year)] : null)}</td>
-      <td>${fmtPct(goV)}</td>
       <td>${fmtPct(gtV)}</td>
     </tr>`;
   });
