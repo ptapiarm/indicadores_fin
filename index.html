@@ -648,7 +648,19 @@ function commonLineOpts(opts){
     responsive:true, maintainAspectRatio:false,
     interaction:{ mode:'index', intersect:false },
     plugins:{
-      legend:{ position:'bottom', labels:{ font:baseFont(), boxWidth:10, padding:10 } },
+      legend:{
+        position:'bottom',
+        labels:{ font:baseFont(), boxWidth:10, padding:10 },
+        onClick:(e, legendItem, legend) => {
+          const chart = legend.chart;
+          const idx = legendItem.datasetIndex;
+          const meta = chart.getDatasetMeta(idx);
+          meta.hidden = meta.hidden === null ? !chart.data.datasets[idx].hidden : null;
+          chart.update();
+        },
+        onHover: (e) => { e.native.target.style.cursor = 'pointer'; },
+        onLeave: (e) => { e.native.target.style.cursor = 'default'; }
+      },
       tooltip:{ titleFont:baseFont(), bodyFont:baseFont(), callbacks: isPct ? {
         label: (item) => `${item.dataset.label}: ${fmtPctTick(item.parsed.y)}`
       } : {} }
@@ -820,8 +832,12 @@ function renderPregrado(zone, pg){
   const planLast = lastPlantaIdx>=0 ? (rows['N° Planta']||[])[lastPlantaIdx] : null;
   const totLast = lastPlantaIdx>=0 ? (rows['Total']||[])[lastPlantaIdx] : null;
 
+  const hasAltPeriodsFacultad = anyDataIn(carreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim','matriculados_1er_trim','matriculados_2do_trim','matriculados_3er_trim']);
   const hasAltPeriods = anyDataIn(periodosCarreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim']);
   const hasRet3 = objYears(dataSource.retencion_3er_anio).length>0;
+  const hasRet1 = objYears(dataSource.retencion_1er_anio).length>0;
+  const hasOcupacion = objYears(dataSource.tasa_ocupacion).length>0;
+  const hasVacNuevos = objYears(dataSource.vacantes_1sem).length>0 || objYears(dataSource.nuevos_ocup).length>0;
   const hasTitOp = objYears(dataSource.titulacion_oportuna).length>0;
   const hasTitTot = objYears(dataSource.titulacion_total).length>0;
   const hasEmpleabilidad = !!pg.empleabilidad;
@@ -890,23 +906,23 @@ function renderPregrado(zone, pg){
 
     <div class="section-title"><span class="n">02</span><h3>Ocupación de vacantes — 1er semestre</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
-      <div class="card"><h4>Tasa de ocupación de vacantes</h4><div class="note">% de vacantes cubiertas, línea de 100% como referencia. No considera Conducencias ni PACE.</div><canvas id="chartOcupacion"></canvas></div>
-      <div class="card"><h4>Vacantes vs. Estudiantes nuevos por año</h4><div class="note">Comparación directa${selected ? scopeSuffix : ', Facultad completa'}. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas></div>
+      <div class="card">${hasOcupacion ? '<h4>Tasa de ocupación de vacantes</h4><div class="note">% de vacantes cubiertas, línea de 100% como referencia. No considera Conducencias ni PACE.</div><canvas id="chartOcupacion"></canvas>' : '<h4>Tasa de ocupación de vacantes</h4>'+emptyMini('Sin datos disponibles')}</div>
+      <div class="card">${hasVacNuevos ? '<h4>Vacantes vs. Estudiantes nuevos por año</h4><div class="note">Comparación directa'+(selected ? scopeSuffix : ', Facultad completa')+'. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas>' : '<h4>Vacantes vs. Estudiantes nuevos por año</h4>'+emptyMini('Sin datos disponibles')}</div>
     </div>
-    ${hasAltPeriods ? `
+    ${hasAltPeriodsFacultad ? `
     <div class="section-title"><span class="n">02b</span><h3>Complemento — Admisión en otros períodos</h3><div class="line"></div></div>
     <div class="note" style="margin:-6px 0 14px; font-size:12px;">Algunas carreras ofrecen vacantes o tienen matriculados fuera del 1er semestre. Como no se consideran en el cálculo de ocupación de vacantes indicado mas arriba, se muestran acá como complemento a esa cifra.</div>
     <div class="chart-grid thirds">
-      <div class="card"><h4>Vacantes vs. matriculados en otros períodos</h4><div class="note">${selected ? scopeSuffix.replace(' — ','') : 'Suma Facultad'}: 2do sem., 1er y 3er trimestre</div><canvas id="chartPeriodos"></canvas></div>
+      <div class="card">${hasAltPeriods ? '<h4>Vacantes vs. matriculados en otros períodos</h4><div class="note">'+(selected ? scopeSuffix.replace(' — ','') : 'Suma Facultad')+': 2do sem., 1er y 3er trimestre</div><canvas id="chartPeriodos"></canvas>' : '<h4>Vacantes vs. matriculados en otros períodos</h4>'+emptyMini('Sin datos disponibles')}</div>
       <div class="card">
         <h4>Detalle por carrera</h4><div class="note">Vacantes ofrecidas y matriculados por año</div>
-        <div class="ledger-wrap" style="border:none;"><table class="ledger" id="tblPeriodos"></table></div>
+        ${hasAltPeriods ? '<div class="ledger-wrap" style="border:none;"><table class="ledger" id="tblPeriodos"></table></div>' : emptyMini('Sin datos disponibles')}
       </div>
     </div>` : ''}
 
     <div class="section-title"><span class="n">03</span><h3>Retención</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
-      <div class="card"><h4>Retención al 1er año</h4><div class="note">% de estudiantes que continúan tras el primer año</div><canvas id="chartRetencion1"></canvas></div>
+      <div class="card"><h4>Retención al 1er año</h4><div class="note">${hasRet1 ? '% de estudiantes que continúan tras el primer año' : 'Sin datos disponibles'}</div>${hasRet1 ? '<canvas id="chartRetencion1"></canvas>' : emptyMini('Sin datos disponibles')}</div>
       <div class="card"><h4>Retención al 3er año</h4><div class="note">${hasRet3 ? '% de estudiantes que continúan tras el tercer año' : 'Sin datos disponibles'}</div>${hasRet3 ? '<canvas id="chartRetencion3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
     </div>
 
@@ -942,10 +958,10 @@ function renderPregrado(zone, pg){
   if(hasMultiple) wireCarreraSelector();
 
   buildVigentesChart(carreras, selected);
-  buildOcupacionChart(dataSource);
-  buildVacNuevosCompChart(dataSource);
+  if(hasOcupacion) buildOcupacionChart(dataSource);
+  if(hasVacNuevos) buildVacNuevosCompChart(dataSource);
   if(hasAltPeriods){ buildPeriodosChart(periodosCarreras); buildPeriodosTable(periodosCarreras); }
-  buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5), RETENCION_INSTITUCIONAL_1ER, selected);
+  if(hasRet1) buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5), RETENCION_INSTITUCIONAL_1ER, selected);
   if(hasRet3) buildRetencionGenericChart('chartRetencion3', dataSource.retencion_3er_anio, objYears(dataSource.retencion_3er_anio), RETENCION_INSTITUCIONAL_3ER, selected);
   if(hasGenero && !selected){
     buildGeneroLineChart('chartGeneroMatricula', pg.genero.matricula_mujer, pg.genero.matricula_hombre, objYears(pg.genero.matricula_mujer), 'Año', '% de matrícula');
@@ -973,11 +989,16 @@ function emptyMini(msg){
 function buildVigentesChart(carreras, selected){
   const ctx = document.getElementById('chartVigentes');
   if(selected){
+    const firstIdx = YEARS.findIndex(y => {
+      const v = (selected.vigentes||{})[y];
+      return v !== undefined && v !== null && v !== 0;
+    });
+    const yearsToPlot = firstIdx > 0 ? YEARS.slice(firstIdx) : YEARS;
     charts.vigentes = new Chart(ctx, {
       type:'line',
-      data:{ labels:YEARS, datasets:[{
+      data:{ labels:yearsToPlot, datasets:[{
         label: shortenName(selected.nombre),
-        data: seriesFor(selected.vigentes, YEARS),
+        data: seriesFor(selected.vigentes, yearsToPlot),
         borderColor: accentColor(currentFac), backgroundColor: accentColor(currentFac)+'33',
         fill:true, tension:0.35, spanGaps:true, pointRadius:3, borderWidth:2.5,
       }] },
@@ -1014,23 +1035,35 @@ function buildVigentesTotalChart(totalFacultad){
 }
 function buildOcupacionChart(totals){
   const ctx = document.getElementById('chartOcupacion');
-  const data = seriesFor(totals.tasa_ocupacion, YEARS);
+  const fullSeries = seriesFor(totals.tasa_ocupacion, YEARS);
+  const firstIdx = fullSeries.findIndex(v => v !== null && v !== 0);
+  const yearsToPlot = firstIdx > 0 ? YEARS.slice(firstIdx) : YEARS;
+  const data = firstIdx > 0 ? fullSeries.slice(firstIdx) : fullSeries;
   charts.ocupacion = new Chart(ctx, {
     type:'line',
-    data:{ labels:YEARS, datasets:[
+    data:{ labels:yearsToPlot, datasets:[
       { label:'Ocupación', data, borderColor:accentColor(currentFac), backgroundColor:accentColor(currentFac)+'33', fill:true, tension:0.3, pointRadius:3, borderWidth:2.5, spanGaps:true },
-      { label:'100% referencia', data:YEARS.map(()=>1), borderColor:'rgba(0,0,0,0.35)', borderDash:[4,4], pointRadius:0, borderWidth:1 }
+      { label:'100% referencia', data:yearsToPlot.map(()=>1), borderColor:'rgba(0,0,0,0.35)', borderDash:[4,4], pointRadius:0, borderWidth:1 }
     ]},
     options: commonLineOpts({xTitle:'Cohorte', yTitle:'% de vacantes cubiertas', isPct:true})
   });
 }
 function buildVacNuevosCompChart(totals){
   const ctx = document.getElementById('chartVacNuevosComp');
+  const vacSeries = seriesFor(totals.vacantes_1sem, YEARS);
+  const nuevSeries = seriesFor(totals.nuevos_ocup, YEARS);
+  const firstIdx = YEARS.findIndex((y,i) => {
+    const v = vacSeries[i], n = nuevSeries[i];
+    return (v !== null && v !== 0) || (n !== null && n !== 0);
+  });
+  const yearsToPlot = firstIdx > 0 ? YEARS.slice(firstIdx) : YEARS;
+  const vacToPlot = firstIdx > 0 ? vacSeries.slice(firstIdx) : vacSeries;
+  const nuevToPlot = firstIdx > 0 ? nuevSeries.slice(firstIdx) : nuevSeries;
   charts.vacNuevosComp = new Chart(ctx, {
     type:'bar',
-    data:{ labels:YEARS, datasets:[
-      { label:'Vacantes 1er sem.', data:seriesFor(totals.vacantes_1sem, YEARS), backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:22 },
-      { label:'Nuevos matriculados', data:seriesFor(totals.nuevos_ocup, YEARS), backgroundColor:accentColor(currentFac), borderRadius:4, maxBarThickness:22 },
+    data:{ labels:yearsToPlot, datasets:[
+      { label:'Vacantes 1er sem.', data:vacToPlot, backgroundColor:'#D9D7CC', borderRadius:4, maxBarThickness:22 },
+      { label:'Nuevos matriculados', data:nuevToPlot, backgroundColor:accentColor(currentFac), borderRadius:4, maxBarThickness:22 },
     ]},
     options: commonBarOpts({xTitle:'Año', yTitle:'Estudiantes'})
   });
@@ -1039,39 +1072,60 @@ function buildVacNuevosCompChart(totals){
 /* ---- Períodos complementarios ---- */
 function buildPeriodosChart(carreras){
   const ctx = document.getElementById('chartPeriodos');
-  const matriculadosPorAnio = y => {
+  const vacantesPorAnio = y => {
+    const v0 = sumAcrossCarreras(carreras,'vac_otros_ofrecidas',y);
     const s2 = sumAcrossCarreras(carreras,'vac_2do_sem',y);
     const t1 = sumAcrossCarreras(carreras,'vac_1er_trim',y);
     const t3 = sumAcrossCarreras(carreras,'vac_3er_trim',y);
-    const parts = [s2,t1,t3].filter(v=>v!==null);
+    const parts = [v0,s2,t1,t3].filter(v=>v!==null);
     return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
   };
+  const matriculadosPorAnio = y => {
+    const m1 = sumAcrossCarreras(carreras,'matriculados_1er_trim',y);
+    const m2 = sumAcrossCarreras(carreras,'matriculados_2do_trim',y);
+    const m3 = sumAcrossCarreras(carreras,'matriculados_3er_trim',y);
+    const parts = [m1,m2,m3].filter(v=>v!==null);
+    return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
+  };
+  const vacSeries = YEARS.map(vacantesPorAnio);
+  const matSeries = YEARS.map(matriculadosPorAnio);
+  const firstIdx = YEARS.findIndex((y,i) => {
+    const v = vacSeries[i], m = matSeries[i];
+    return (v !== null && v !== 0) || (m !== null && m !== 0);
+  });
+  const yearsToPlot = firstIdx > 0 ? YEARS.slice(firstIdx) : YEARS;
+  const vacToPlot = firstIdx > 0 ? vacSeries.slice(firstIdx) : vacSeries;
+  const matToPlot = firstIdx > 0 ? matSeries.slice(firstIdx) : matSeries;
   charts.periodos = new Chart(ctx, {
     type:'bar',
-    data:{ labels: YEARS, datasets:[
-      { label:'Vacantes ofrecidas', data: YEARS.map(y=>sumAcrossCarreras(carreras,'vac_otros_ofrecidas',y)), backgroundColor: '#D9D7CC', borderRadius:4, maxBarThickness:26 },
-      { label:'Matriculados', data: YEARS.map(matriculadosPorAnio), backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:26 },
+    data:{ labels: yearsToPlot, datasets:[
+      { label:'Vacantes ofrecidas', data: vacToPlot, backgroundColor: '#D9D7CC', borderRadius:4, maxBarThickness:26 },
+      { label:'Matriculados', data: matToPlot, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:26 },
     ]},
     options: commonBarOpts({xTitle:'Año Académico', yTitle:'Estudiantes'})
   });
 }
 function buildPeriodosTable(carreras){
   const tbl = document.getElementById('tblPeriodos');
-  const rows = carreras.filter(c => ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim'].some(f => c[f] && Object.keys(c[f]).length));
+  const vacFields = ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim'];
+  const matFields = ['matriculados_1er_trim','matriculados_2do_trim','matriculados_3er_trim'];
+  const rows = carreras.filter(c => vacFields.concat(matFields).some(f => c[f] && Object.keys(c[f]).length));
 
-  // Collect every year that has any data (vacantes ofrecidas or matriculados) across these carreras
   const yearsSet = new Set();
   rows.forEach(c=>{
-    ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim'].forEach(f=>{
+    vacFields.concat(matFields).forEach(f=>{
       Object.keys(c[f]||{}).forEach(y=>yearsSet.add(Number(y)));
     });
   });
   let years = Array.from(yearsSet).sort((a,b)=>a-b);
   if(years.length > 3) years = years.slice(-3); // solo los últimos 3 años con datos
 
+  const vacantesDeCarrera = (c, y) => {
+    const parts = vacFields.map(f => (c[f]||{})[y]).filter(v => v!==undefined && v!==null);
+    return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
+  };
   const matriculadosDeCarrera = (c, y) => {
-    const parts = [c.vac_2do_sem, c.vac_1er_trim, c.vac_3er_trim]
-      .map(f => (f||{})[y]).filter(v => v!==undefined && v!==null);
+    const parts = matFields.map(f => (c[f]||{})[y]).filter(v => v!==undefined && v!==null);
     return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
   };
 
@@ -1080,7 +1134,7 @@ function buildPeriodosTable(carreras){
     html += `<tr>
       <td class="name" rowspan="2" style="vertical-align:middle;">${escapeHtml(c.nombre)}</td>
       <td><span class="mod-badge">Vacantes</span></td>
-      ${years.map(y=>`<td>${fmtInt((c.vac_otros_ofrecidas||{})[y])}</td>`).join('')}
+      ${years.map(y=>`<td>${fmtInt(vacantesDeCarrera(c,y))}</td>`).join('')}
     </tr>
     <tr>
       <td><span class="mod-badge">Matriculados</span></td>
