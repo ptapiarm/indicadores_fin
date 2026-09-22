@@ -832,8 +832,8 @@ function renderPregrado(zone, pg){
   const planLast = lastPlantaIdx>=0 ? (rows['N° Planta']||[])[lastPlantaIdx] : null;
   const totLast = lastPlantaIdx>=0 ? (rows['Total']||[])[lastPlantaIdx] : null;
 
-  const hasAltPeriodsFacultad = anyDataIn(carreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim','matriculados_1er_trim','matriculados_2do_trim','matriculados_3er_trim']);
-  const hasAltPeriods = anyDataIn(periodosCarreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim']);
+  const hasAltPeriodsFacultad = anyDataIn(carreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_2do_trim','vac_3er_trim']);
+  const hasAltPeriods = anyDataIn(periodosCarreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_2do_trim','vac_3er_trim']);
   const hasRet3 = objYears(dataSource.retencion_3er_anio).length>0;
   const hasRet1 = objYears(dataSource.retencion_1er_anio).length>0;
   const hasOcupacion = objYears(dataSource.tasa_ocupacion).length>0;
@@ -1072,19 +1072,13 @@ function buildVacNuevosCompChart(totals){
 /* ---- Períodos complementarios ---- */
 function buildPeriodosChart(carreras){
   const ctx = document.getElementById('chartPeriodos');
-  const vacantesPorAnio = y => {
-    const v0 = sumAcrossCarreras(carreras,'vac_otros_ofrecidas',y);
+  const vacantesPorAnio = y => sumAcrossCarreras(carreras,'vac_otros_ofrecidas',y);
+  const matriculadosPorAnio = y => {
     const s2 = sumAcrossCarreras(carreras,'vac_2do_sem',y);
     const t1 = sumAcrossCarreras(carreras,'vac_1er_trim',y);
+    const t2 = sumAcrossCarreras(carreras,'vac_2do_trim',y);
     const t3 = sumAcrossCarreras(carreras,'vac_3er_trim',y);
-    const parts = [v0,s2,t1,t3].filter(v=>v!==null);
-    return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
-  };
-  const matriculadosPorAnio = y => {
-    const m1 = sumAcrossCarreras(carreras,'matriculados_1er_trim',y);
-    const m2 = sumAcrossCarreras(carreras,'matriculados_2do_trim',y);
-    const m3 = sumAcrossCarreras(carreras,'matriculados_3er_trim',y);
-    const parts = [m1,m2,m3].filter(v=>v!==null);
+    const parts = [s2,t1,t2,t3].filter(v=>v!==null);
     return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
   };
   const vacSeries = YEARS.map(vacantesPorAnio);
@@ -1107,25 +1101,20 @@ function buildPeriodosChart(carreras){
 }
 function buildPeriodosTable(carreras){
   const tbl = document.getElementById('tblPeriodos');
-  const vacFields = ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_3er_trim'];
-  const matFields = ['matriculados_1er_trim','matriculados_2do_trim','matriculados_3er_trim'];
-  const rows = carreras.filter(c => vacFields.concat(matFields).some(f => c[f] && Object.keys(c[f]).length));
+  const rows = carreras.filter(c => ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_2do_trim','vac_3er_trim'].some(f => c[f] && Object.keys(c[f]).length));
 
   const yearsSet = new Set();
   rows.forEach(c=>{
-    vacFields.concat(matFields).forEach(f=>{
+    ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_2do_trim','vac_3er_trim'].forEach(f=>{
       Object.keys(c[f]||{}).forEach(y=>yearsSet.add(Number(y)));
     });
   });
   let years = Array.from(yearsSet).sort((a,b)=>a-b);
   if(years.length > 3) years = years.slice(-3); // solo los últimos 3 años con datos
 
-  const vacantesDeCarrera = (c, y) => {
-    const parts = vacFields.map(f => (c[f]||{})[y]).filter(v => v!==undefined && v!==null);
-    return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
-  };
   const matriculadosDeCarrera = (c, y) => {
-    const parts = matFields.map(f => (c[f]||{})[y]).filter(v => v!==undefined && v!==null);
+    const parts = [c.vac_2do_sem, c.vac_1er_trim, c.vac_2do_trim, c.vac_3er_trim]
+      .map(f => (f||{})[y]).filter(v => v!==undefined && v!==null);
     return parts.length ? parts.reduce((a,b)=>a+b,0) : null;
   };
 
@@ -1134,7 +1123,7 @@ function buildPeriodosTable(carreras){
     html += `<tr>
       <td class="name" rowspan="2" style="vertical-align:middle;">${escapeHtml(c.nombre)}</td>
       <td><span class="mod-badge">Vacantes</span></td>
-      ${years.map(y=>`<td>${fmtInt(vacantesDeCarrera(c,y))}</td>`).join('')}
+      ${years.map(y=>`<td>${fmtInt((c.vac_otros_ofrecidas||{})[y])}</td>`).join('')}
     </tr>
     <tr>
       <td><span class="mod-badge">Matriculados</span></td>
