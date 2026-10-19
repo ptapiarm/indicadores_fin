@@ -338,6 +338,25 @@
     font-family:'IBM Plex Sans',sans-serif;
   }
   .card .note{ font-size:11px; color:var(--ink-soft); margin-bottom:10px;}
+  /* ---- Ayuda de definiciones (?) ---- */
+  .info-tip{
+    display:inline-flex; align-items:center; justify-content:center;
+    width:16px; height:16px; margin-left:6px; vertical-align:2px;
+    border:1.3px solid var(--ink-soft); border-radius:50%;
+    font:600 10px/1 'IBM Plex Sans',sans-serif; color:var(--ink-soft);
+    cursor:help; user-select:none; transition:all .15s;
+  }
+  .info-tip:hover, .info-tip:focus{ border-color:var(--accent); color:var(--accent); outline:none; }
+  #defTooltip{
+    position:fixed; z-index:9999; max-width:320px; padding:10px 12px;
+    background:#1A1A1A; color:#fff; border-radius:8px;
+    font:400 12px/1.45 'IBM Plex Sans',sans-serif;
+    box-shadow:0 6px 20px rgba(0,0,0,.18);
+    pointer-events:none; opacity:0; transition:opacity .12s;
+  }
+  #defTooltip.show{ opacity:1; }
+  #defTooltip b{ display:block; margin-bottom:4px; color:#FF6F43; font-weight:600; }
+
   .card canvas{ max-height:270px; }
   .card.tall canvas{ max-height:320px; }
 
@@ -379,6 +398,7 @@
   table.ledger tr:last-child td{border-bottom:none;}
   table.ledger tr:hover td{ background:var(--accent-soft); }
   table.ledger tr.selected-row td{ background:var(--accent-soft); font-weight:600; }
+  table.ledger tr.group-row td{ background:var(--paper-2); font-weight:700; font-size:11.5px; letter-spacing:.04em; text-transform:uppercase; color:var(--ink-soft); padding-top:14px; padding-bottom:6px; cursor:default; border-top:1px solid var(--paper-line); }
   .mod-badge{
     display:inline-block; font-size:10px; font-family:'IBM Plex Sans',sans-serif;
     font-weight:600; padding:2px 7px; border-radius:20px;
@@ -435,6 +455,7 @@
 </style>
 </head>
 <body>
+<!--
 <div id="passGate" style="position:fixed; inset:0; background:#ecebe5; z-index:9999; display:flex; align-items:center; justify-content:center; font-family:inherit;">
   <div style="background:#fff; border-radius:14px; padding:36px 40px; box-shadow:0 8px 30px rgba(0,0,0,0.12); width:320px; text-align:center;">
     <h2 style="margin:0 0 6px; font-size:18px;">Facultad de Ingeniería</h2>
@@ -466,6 +487,7 @@
   input.addEventListener('keydown', function(e){ if(e.key === 'Enter') tryUnlock(); });
 })();
 </script>
+-->
 <div class="wrap">
 
   <div class="masthead">
@@ -487,7 +509,7 @@
 </div>
 
 <script>
-const DATA = {"Ingeniería": {"pregrado": {"carreras": [{"nombre": "Ingeniería Civil en Informática (Diurno)", "modalidad": "DIURNA", "codigo": 48.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 1.0, "2025": 12.0, "2026": 36.0}, "nuevos": {"2024": 1.0, "2025": 11.0, "2026": 26.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 25.0, "2025": 10.0, "2026": 10.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 20.0, "2025": 0.0, "2026": 0.0}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.9090909090909091}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2024": 0.04, "2025": 0.1, "2026": 0.0}, "nuevos_ocup": {"2024": 1, "2025": 1, "2026": 0}}, {"nombre": "Ingeniería Civil Industrial (Diurno)", "modalidad": "DIURNA", "codigo": 47.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 1.0, "2025": 20.0, "2026": 40.0}, "nuevos": {"2024": 1.0, "2025": 19.0, "2026": 23.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 75.0, "2025": 10.0, "2026": 10.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 40.0, "2025": 0.0, "2026": 0.0}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.8421052631578947}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2024": 0.013333333333333334, "2025": 0.1, "2026": 0.0}, "nuevos_ocup": {"2024": 1, "2025": 1, "2026": 0}}, {"nombre": "Ingeniería Civil Industrial (online)", "modalidad": "ONLINE", "codigo": 10054.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 76.0, "2026": 177.0}, "nuevos": {"2025": 76.0, "2026": 92.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 40.0, "2026": 80.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 40.0, "2026": 30.0}, "vac_2do_sem": {"2025": 34.0, "2026": 15.0}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.8157894736842105}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2025": 2.025, "2026": 1.2125}, "nuevos_ocup": {"2024": 0, "2025": 81, "2026": 97}}, {"nombre": "Ingeniería Civil plan común", "modalidad": "DIURNA", "codigo": 46.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 106.0, "2025": 160.0, "2026": 198.0}, "nuevos": {"2023": 44.0, "2024": 74.0, "2025": 103.0, "2026": 106.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 70.0, "2024": 80.0, "2025": 90.0, "2026": 110.0}, "vac_otros_ofrecidas": {}, "vac_2do_sem": {"2024": 3.0, "2025": 1.0}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2023": 0.7272727272727273, "2024": 0.7567567567567568, "2025": 0.8857142857142857}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2023": 0.44285714285714284, "2024": 0.6625, "2025": 1.011111111111111, "2026": 0.8818181818181818}, "nuevos_ocup": {"2021": 0, "2022": 0, "2023": 31, "2024": 53, "2025": 91, "2026": 97}}], "total_facultad": {"vigentes": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 108.0, "2025": 268.0, "2026": 451.0}, "nuevos": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 76.0, "2025": 209.0, "2026": 247.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 70.0, "2024": 180.0, "2025": 150.0, "2026": 210.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 60.0, "2025": 40.0, "2026": 30.0}, "vac_2do_sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 3.0, "2025": 35.0, "2026": 15.0}, "vac_1er_trim": {"2024": 0.0}, "vac_3er_trim": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0, "2026": 0.0}, "retencion_1er_anio": {"2023": 0.7272727272727273, "2024": 0.7567567567567568, "2025": 0.8578199052132701}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2023": 0.44285714285714284, "2024": 0.3055555555555556, "2025": 1.16, "2026": 0.9238095238095239}, "nuevos_ocup": {"2024": 55, "2025": 174, "2026": 194, "2021": 0, "2022": 0, "2023": 31}}, "planta_docente": {"years": [2022, 2023, 2024, 2025, 2026], "rows": {"N° Honorarios": [null, 4.0, 8.0, 16.0, 27.0], "N° Planta": [null, 6.0, 7.0, 7.0, 8.0], "Total": [0.0, 10.0, 15.0, 23.0, 35.0]}}, "jce": {"years": [2022, 2023, 2024, 2025, 2026], "categorias": {"ASISTENTE": [null, 1.0, 1.0, 1.0, null], "ASOCIADO": [null, 2.0, 3.0, 3.0, 3.0], "Sin categorizar": [null, 7.0, 3.7000000000000006, 4.712500000000001, 10.164999999999996]}, "total": [null, 10.0, 7.700000000000001, 8.712500000000002, 13.164999999999996]}, "jce_per_student": {"years": [2022, 2023, 2024, 2025, 2026], "values": [null, 4.4, 14.025974025974024, 30.76040172166427, 34.25750094948729]}, "empleabilidad": null, "gratuidad": {"years": [2020, 2021, 2022, 2023, 2024, 2025, 2026], "facultad": {"nombre": "INGENIERÍA", "valores": [null, null, null, 0.673469387755102, 0.85, 0.4473684210526316, 0.48484848484848486]}, "carreras": [{"nombre": "INGENIERÍA CIVIL EN INFORMÁTICA", "valores": [null, null, null, null, 1.0, 1.0, null]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL", "valores": [null, null, null, null, 1.0, 1.0, null]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL (ONLINE)", "valores": [null, null, null, null, null, 0.0, 0.0]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL VESPERTINO", "valores": [null, null, null, null, 0.0, null, null]}, {"nombre": "INGENIERÍA CIVIL PLAN COMÚN", "valores": [null, null, null, 0.673469387755102, 0.8571428571428571, 0.8771929824561403, 0.897196261682243]}]}, "genero": {"matricula_mujer": {"2023": 0.4090909090909091, "2024": 0.28703703703703703, "2025": 0.24253731343283583, "2026": 0.2572062084257206}, "matricula_hombre": {"2023": 0.5909090909090909, "2024": 0.7129629629629629, "2025": 0.7574626865671642, "2026": 0.7427937915742794}, "retencion_1er_mujer": {"2023": 0.6666666666666666, "2024": 0.7368421052631579, "2025": 0.8823529411764706}, "retencion_1er_hombre": {"2023": 0.7586206896551724, "2024": 0.7719298245614035, "2025": 0.85}, "retencion_3er_mujer": {}, "retencion_3er_hombre": {}}}, "postgrado": null, "educacion_continua": null, "investigacion": {"tipos": [{"nombre": "Fondecyt", "valores": {"2023": 0, "2024": 2}}, {"nombre": "Fondos Académicos (no Fondecyt)", "valores": {"2023": 3, "2024": 0}}, {"nombre": "Fondos Internos UAH", "valores": {"2023": 0, "2024": 1}}, {"nombre": "Proyectos de Pertinencia Pública y Relevancia Social", "valores": {"2023": 1, "2024": 0}}, {"nombre": "Proyectos de Cultura", "valores": {"2023": 0, "2024": 0}}], "total": {"2023": 4, "2024": 3}, "vigentes": {"tipos": [{"nombre": "Fondecyt", "valores": {"2023": 0, "2024": 2}}, {"nombre": "Fondos Académicos (no Fondecyt)", "valores": {"2023": 3, "2024": 2}}, {"nombre": "Fondos Internos UAH", "valores": {"2023": 0, "2024": 1}}, {"nombre": "Proyectos de Pertinencia Pública", "valores": {"2023": 1, "2024": 1}}, {"nombre": "Proyectos de Cultura", "valores": {"2023": 0, "2024": 0}}], "total": {"2023": 4, "2024": 6}}}}};
+const DATA = {"Ingeniería": {"pregrado": {"carreras": [{"nombre": "Ingeniería Civil en Informática (Diurno)", "modalidad": "DIURNA", "codigo": 48.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 1.0, "2025": 12.0, "2026": 36.0}, "nuevos": {"2024": 1.0, "2025": 11.0, "2026": 26.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 25.0, "2025": 10.0, "2026": 10.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 20.0, "2025": 0.0, "2026": 0.0}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.9090909090909091}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2024": 0.04, "2025": 0.1, "2026": 0.0}, "nuevos_ocup": {"2024": 1, "2025": 1, "2026": 0}, "via_abril": {"2024": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 10}, "2026": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 26}}, "via_total": {"2024": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 12}, "2026": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 27}}}, {"nombre": "Ingeniería Civil Industrial (Diurno)", "modalidad": "DIURNA", "codigo": 47.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 1.0, "2025": 20.0, "2026": 40.0}, "nuevos": {"2024": 1.0, "2025": 19.0, "2026": 23.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 75.0, "2025": 10.0, "2026": 10.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 40.0, "2025": 0.0, "2026": 0.0}, "vac_2do_sem": {}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.8421052631578947}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2024": 0.013333333333333334, "2025": 0.1, "2026": 0.0}, "nuevos_ocup": {"2024": 1, "2025": 1, "2026": 0}, "via_abril": {"2024": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 18}, "2026": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 23}}, "via_total": {"2024": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 1, "PACE": 0, "Conducencias": 18}, "2026": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 23}}}, {"nombre": "Ingeniería Civil Industrial (online)", "modalidad": "ONLINE", "codigo": 10054.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 76.0, "2026": 177.0}, "nuevos": {"2025": 76.0, "2026": 92.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 40.0, "2026": 80.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 40.0, "2026": 30.0}, "vac_2do_sem": {"2025": 34.0, "2026": 15.0}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2025": 0.8157894736842105}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2025": 2.025, "2026": 1.2125}, "nuevos_ocup": {"2024": 0, "2025": 81, "2026": 97}, "via_abril": {"2025": {"Admisión Centralizada": 0, "Admisión Especial": 76, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}, "2026": {"Admisión Centralizada": 0, "Admisión Especial": 92, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}}, "via_total": {"2024": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 0, "Admisión Especial": 81, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}, "2026": {"Admisión Centralizada": 0, "Admisión Especial": 97, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}}}, {"nombre": "Ingeniería Civil plan común", "modalidad": "DIURNA", "codigo": 46.0, "acreditacion_anios": null, "vigentes": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 106.0, "2025": 160.0, "2026": 198.0}, "nuevos": {"2023": 44.0, "2024": 74.0, "2025": 103.0, "2026": 106.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 70.0, "2024": 80.0, "2025": 90.0, "2026": 110.0}, "vac_otros_ofrecidas": {}, "vac_2do_sem": {"2024": 3.0, "2025": 1.0}, "vac_1er_trim": {}, "vac_3er_trim": {}, "retencion_1er_anio": {"2023": 0.7272727272727273, "2024": 0.7567567567567568, "2025": 0.8857142857142857}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2023": 0.44285714285714284, "2024": 0.6625, "2025": 1.011111111111111, "2026": 0.8818181818181818}, "nuevos_ocup": {"2021": 0, "2022": 0, "2023": 31, "2024": 53, "2025": 91, "2026": 97}, "via_abril": {"2023": {"Admisión Centralizada": 27, "Admisión Especial": 5, "Adm. Complementaria": 12, "PACE": 0, "Conducencias": 0}, "2024": {"Admisión Centralizada": 53, "Admisión Especial": 6, "Adm. Complementaria": 15, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 82, "Admisión Especial": 4, "Adm. Complementaria": 17, "PACE": 0, "Conducencias": 0}, "2026": {"Admisión Centralizada": 93, "Admisión Especial": 5, "Adm. Complementaria": 7, "PACE": 1, "Conducencias": 0}}, "via_total": {"2022": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}, "2023": {"Admisión Centralizada": 31, "Admisión Especial": 6, "Adm. Complementaria": 12, "PACE": 0, "Conducencias": 0}, "2024": {"Admisión Centralizada": 53, "Admisión Especial": 6, "Adm. Complementaria": 16, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 91, "Admisión Especial": 4, "Adm. Complementaria": 17, "PACE": 0, "Conducencias": 0}, "2026": {"Admisión Centralizada": 97, "Admisión Especial": 5, "Adm. Complementaria": 8, "PACE": 1, "Conducencias": 0}}}], "total_facultad": {"vigentes": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 108.0, "2025": 268.0, "2026": 451.0}, "nuevos": {"2021": 0.0, "2022": 0.0, "2023": 44.0, "2024": 76.0, "2025": 209.0, "2026": 247.0}, "vacantes_1sem": {"2021": 0.0, "2022": 0.0, "2023": 70.0, "2024": 180.0, "2025": 150.0, "2026": 210.0}, "vac_otros_ofrecidas": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 60.0, "2025": 40.0, "2026": 30.0}, "vac_2do_sem": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 3.0, "2025": 35.0, "2026": 15.0}, "vac_1er_trim": {"2024": 0.0}, "vac_3er_trim": {"2021": 0.0, "2022": 0.0, "2023": 0.0, "2024": 0.0, "2025": 0.0, "2026": 0.0}, "retencion_1er_anio": {"2023": 0.7272727272727273, "2024": 0.7567567567567568, "2025": 0.8578199052132701}, "retencion_3er_anio": {}, "titulacion_oportuna": {}, "titulacion_total": {}, "tasa_ocupacion": {"2023": 0.44285714285714284, "2024": 0.3055555555555556, "2025": 1.16, "2026": 0.9238095238095239}, "nuevos_ocup": {"2024": 55, "2025": 174, "2026": 194, "2021": 0, "2022": 0, "2023": 31}, "via_abril": {"2023": {"Admisión Centralizada": 27, "Admisión Especial": 5, "Adm. Complementaria": 12, "PACE": 0, "Conducencias": 0}, "2024": {"Admisión Centralizada": 53, "Admisión Especial": 6, "Adm. Complementaria": 17, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 82, "Admisión Especial": 80, "Adm. Complementaria": 19, "PACE": 0, "Conducencias": 28}, "2026": {"Admisión Centralizada": 93, "Admisión Especial": 97, "Adm. Complementaria": 7, "PACE": 1, "Conducencias": 49}}, "via_total": {"2022": {"Admisión Centralizada": 0, "Admisión Especial": 0, "Adm. Complementaria": 0, "PACE": 0, "Conducencias": 0}, "2023": {"Admisión Centralizada": 31, "Admisión Especial": 6, "Adm. Complementaria": 12, "PACE": 0, "Conducencias": 0}, "2024": {"Admisión Centralizada": 53, "Admisión Especial": 6, "Adm. Complementaria": 18, "PACE": 0, "Conducencias": 0}, "2025": {"Admisión Centralizada": 91, "Admisión Especial": 85, "Adm. Complementaria": 19, "PACE": 0, "Conducencias": 30}, "2026": {"Admisión Centralizada": 97, "Admisión Especial": 102, "Adm. Complementaria": 8, "PACE": 1, "Conducencias": 50}}}, "planta_docente": {"years": [2022, 2023, 2024, 2025, 2026], "rows": {"N° Honorarios": [null, 4.0, 8.0, 16.0, 27.0], "N° Planta": [null, 6.0, 7.0, 7.0, 8.0], "Total": [0.0, 10.0, 15.0, 23.0, 35.0]}}, "jce": {"years": [2022, 2023, 2024, 2025, 2026], "categorias": {"ASISTENTE": [null, 1, 1, 1, null], "ASOCIADO": [null, 2, 3, 3, 3], "Sin categorizar": [null, 3, 2.5, 2.5, 4.5]}, "total": [null, 6, 6.5, 6.5, 7.5]}, "jce_per_student": {"years": [2022, 2023, 2024, 2025, 2026], "values": [null, 7.333333333333333, 16.615384615384617, 41.23076923076923, 60.13333333333333]}, "empleabilidad": null, "gratuidad": {"years": [2020, 2021, 2022, 2023, 2024, 2025, 2026], "facultad": {"nombre": "INGENIERÍA", "valores": [null, null, null, 0.673469387755102, 0.85, 0.4473684210526316, 0.48484848484848486]}, "carreras": [{"nombre": "INGENIERÍA CIVIL EN INFORMÁTICA", "valores": [null, null, null, null, 1.0, 1.0, null]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL", "valores": [null, null, null, null, 1.0, 1.0, null]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL (ONLINE)", "valores": [null, null, null, null, null, 0.0, 0.0]}, {"nombre": "INGENIERÍA CIVIL INDUSTRIAL VESPERTINO", "valores": [null, null, null, null, 0.0, null, null]}, {"nombre": "INGENIERÍA CIVIL PLAN COMÚN", "valores": [null, null, null, 0.673469387755102, 0.8571428571428571, 0.8771929824561403, 0.897196261682243]}]}, "genero": {"matricula_mujer": {"2023": 0.4090909090909091, "2024": 0.28703703703703703, "2025": 0.24253731343283583, "2026": 0.2572062084257206}, "matricula_hombre": {"2023": 0.5909090909090909, "2024": 0.7129629629629629, "2025": 0.7574626865671642, "2026": 0.7427937915742794}, "retencion_1er_mujer": {"2023": 0.6666666666666666, "2024": 0.7368421052631579, "2025": 0.8823529411764706}, "retencion_1er_hombre": {"2023": 0.7586206896551724, "2024": 0.7719298245614035, "2025": 0.85}, "retencion_3er_mujer": {}, "retencion_3er_hombre": {}}}, "postgrado": null, "educacion_continua": null, "investigacion": {"tipos": [{"nombre": "Fondecyt", "valores": {"2023": 0, "2024": 2}}, {"nombre": "Fondos Académicos (no Fondecyt)", "valores": {"2023": 3, "2024": 0}}, {"nombre": "Fondos Internos UAH", "valores": {"2023": 0, "2024": 1}}, {"nombre": "Proyectos de Pertinencia Pública y Relevancia Social", "valores": {"2023": 1, "2024": 0}}, {"nombre": "Proyectos de Cultura", "valores": {"2023": 0, "2024": 0}}], "total": {"2023": 4, "2024": 3}, "vigentes": {"tipos": [{"nombre": "Fondecyt", "valores": {"2023": 0, "2024": 2}}, {"nombre": "Fondos Académicos (no Fondecyt)", "valores": {"2023": 3, "2024": 2}}, {"nombre": "Fondos Internos UAH", "valores": {"2023": 0, "2024": 1}}, {"nombre": "Proyectos de Pertinencia Pública", "valores": {"2023": 1, "2024": 1}}, {"nombre": "Proyectos de Cultura", "valores": {"2023": 0, "2024": 0}}], "total": {"2023": 4, "2024": 6}}}}};
 /* ============================================================
    Panel Académico de Facultades — lógica de la aplicación
    ============================================================ */
@@ -805,6 +827,73 @@ function renderContent(){
 /* ================================================================
    PREGRADO
    ================================================================ */
+/* ---------------- Matrícula nuevos por vía de admisión ---------------- */
+const VIAS_INGRESO = ['Admisión Centralizada','Admisión Especial','Adm. Complementaria','PACE','Conducencias'];
+const VIAS_COLORS = ['#FF6F43','#1A1A1A','#B9B7AC','#C2410C','#FFD3BB'];
+function viaHasData(obj){
+  if(!obj) return false;
+  return Object.values(obj).some(d => VIAS_INGRESO.some(v => (d[v]||0) > 0));
+}
+function viaMaxTotal(obj){
+  if(!obj) return 0;
+  return Math.max(0, ...Object.entries(obj).filter(([y])=>YEARS.includes(Number(y))).map(([,d]) => VIAS_INGRESO.reduce((s,v)=>s+(d[v]||0),0)));
+}
+function buildViaIngresoChart(elId, obj, yMax){
+  const ctx = document.getElementById(elId);
+  if(!ctx) return;
+  const yrs = Object.keys(obj).map(Number).filter(y => YEARS.includes(y)).sort((a,b)=>a-b);
+  const firstIdx = yrs.findIndex(y => VIAS_INGRESO.some(v => (obj[String(y)][v]||0) > 0));
+  const years = YEARS.filter(y => firstIdx>=0 && y >= yrs[firstIdx]);
+  const datasets = VIAS_INGRESO.map((v,i)=>({
+    label: v,
+    data: years.map(y => obj[String(y)] ? (obj[String(y)][v] || 0) : null),
+    backgroundColor: VIAS_COLORS[i],
+    borderRadius: 2,
+    maxBarThickness: 34,
+  })).filter(ds => ds.data.some(x => x));
+  const opts = commonBarOpts({xTitle:'Año Académico', yTitle:'N° de estudiantes nuevos', stacked:true});
+  if(yMax) opts.scales.y.suggestedMax = yMax;
+  opts.plugins.tooltip.callbacks = {
+    label: (item) => `${item.dataset.label}: ${fmtInt(item.parsed.y)}`,
+    footer: (items) => {
+      const y = String(items[0].label);
+      const d = obj[y] || {};
+      return 'Total: ' + fmtInt(VIAS_INGRESO.reduce((s,v)=>s+(d[v]||0),0));
+    }
+  };
+  charts[elId] = new Chart(ctx, { type:'bar', data:{ labels: years, datasets }, options: opts });
+}
+
+
+/* ---------------- Ayuda de definiciones (?) ---------------- */
+const DEFINICIONES = {"abril": ["Matrícula Admisión al 30 de Abril", "Cantidad de estudiantes nuevos que al 30 de Abril están como alumnos Regulares."], "admtotal": ["Matrícula Admisión Total", "Cantidad total de estudiantes nuevos que se matricularon en el proceso de admisión, estas cifras incluyen a estudiantes que al 30 de Abril ya no eran alumnos Regulares."], "ocupacion": ["Tasa de ocupación", "Corresponde al % de las Vacantes ocupadas. Para Carreras DEMRE el cálculo es Matriculados DEMRE/Vacantes ofrecidas. Mientras que, para Carreras Especiales, el cálculo es (Matriculados DEMRE+ Matriculados Especial y Complementaria)/Vacantes. Se excluyen del cálculo las Conducencias y PACE por ser cupos supernumerarios. Se consideran solo vacantes del 1er semestre."], "ret1": ["Retención 1er Año", "Porcentaje de estudiantes nuevos que, al 30 de abril del año siguiente, siguen matriculados en la misma carrera (X+1)."], "ret3": ["Retención 3er Año", "Porcentaje de estudiantes de una cohorte de ingreso que continúa vigente en la misma carrera al 30 de abril de su tercer año de ingreso (X+3)."], "tittotal": ["Tasa titulación total", "Porcentaje de estudiantes de la cohorte de ingreso indicada con finalización académica (plan de estudios) y finalización total (Plan de estudios + procesos administrativos). Este indicador es acumulativo y considera a todos/as los/as titulados/as de la carrera o programa independiente de su año de titulación. Consolidado al 30 de abril."], "titop": ["Tasa titulación oportuna", "Porcentaje de estudiantes de la cohorte de ingreso indicada con finalización académica (plan de estudios) y finalización total (Plan de estudios + procesos administrativos). Este indicador considera a estudiantes que terminan su carrera dentro de la duración formal del plan de estudios más un año adicional. Consolidado al 30 de abril."], "vigentes": ["Evolución de matrícula vigente", "Total de Estudiantes vigentes al 30 de abril de cada año, por carrera."], "vigentesTotal": ["Evolución de matrícula vigente — Total Facultad", "Total de Estudiantes vigentes al 30 de abril de cada año, en la Facultad."], "gratuidad": ["% Estudiantes con gratuidad", "% de Estudiantes con gratuidad por cohorte de ingreso. En este caso la fecha de corte hasta el 2025 es 31 de Octubre, mientras que para el 2026 es hasta Junio."], "otrosPeriodos": ["Vacantes vs. matriculados en otros períodos", "Corresponde a los matriculados que hay en periodos diferentes al 1er semestre."], "ret1Genero": ["Retención 1er año por género", "Retención 1er Año desagregada por género: porcentaje de estudiantes nuevos que, al 30 de abril del año siguiente, siguen matriculados en la misma carrera (X+1), calculado por separado para cada género.<br><br><i>Ejemplo de lectura: Del total de mujeres que ingresaron el año X, un N% fueron retenidas.</i>"], "ret3Genero": ["Retención 3er año por género", "Retención 3er Año desagregada por género: porcentaje de estudiantes de una cohorte de ingreso que continúa vigente en la misma carrera al 30 de abril de su tercer año de ingreso (X+3), calculado por separado para cada género.<br><br><i>Ejemplo de lectura: Del total de mujeres que ingresaron el año X, un N% fueron retenidas.</i>"]};
+function infoTip(key){
+  return DEFINICIONES[key] ? `<span class="info-tip" tabindex="0" role="button" aria-label="Definición: ${DEFINICIONES[key][0]}" data-def="${key}">?</span>` : '';
+}
+(function(){
+  const tip = document.createElement('div'); tip.id = 'defTooltip';
+  document.addEventListener('DOMContentLoaded', () => document.body.appendChild(tip));
+  function show(el){
+    const d = DEFINICIONES[el.dataset.def]; if(!d) return;
+    if(!tip.parentNode) document.body.appendChild(tip);
+    tip.innerHTML = `<b>${d[0]}</b>${d[1]}`;
+    tip.classList.add('show');
+    const r = el.getBoundingClientRect(), t = tip.getBoundingClientRect(), m = 8;
+    let left = r.left + r.width/2 - t.width/2;
+    left = Math.max(m, Math.min(left, window.innerWidth - t.width - m));
+    let top = r.bottom + 8;
+    if(top + t.height > window.innerHeight - m) top = r.top - t.height - 8;
+    tip.style.left = left + 'px'; tip.style.top = top + 'px';
+  }
+  function hide(){ tip.classList.remove('show'); }
+  document.addEventListener('mouseover', e => { const el = e.target.closest('.info-tip'); if(el) show(el); });
+  document.addEventListener('mouseout', e => { if(e.target.closest('.info-tip')) hide(); });
+  document.addEventListener('focusin', e => { const el = e.target.closest('.info-tip'); if(el) show(el); });
+  document.addEventListener('focusout', e => { if(e.target.closest('.info-tip')) hide(); });
+  document.addEventListener('click', e => { const el = e.target.closest('.info-tip'); if(el){ e.stopPropagation(); show(el); } else hide(); }, true);
+  window.addEventListener('scroll', hide, true);
+})();
+
 function renderPregrado(zone, pg){
   const carreras = pg.carreras;
   const hasMultiple = carreras.length > 1;
@@ -834,6 +923,8 @@ function renderPregrado(zone, pg){
 
   const hasAltPeriodsFacultad = anyDataIn(carreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_2do_trim','vac_3er_trim']);
   const hasAltPeriods = anyDataIn(periodosCarreras, ['vac_otros_ofrecidas','vac_2do_sem','vac_1er_trim','vac_2do_trim','vac_3er_trim']);
+  const hasViaAbril = viaHasData(dataSource.via_abril);
+  const hasViaTotal = viaHasData(dataSource.via_total);
   const hasRet3 = objYears(dataSource.retencion_3er_anio).length>0;
   const hasRet1 = objYears(dataSource.retencion_1er_anio).length>0;
   const hasOcupacion = objYears(dataSource.tasa_ocupacion).length>0;
@@ -859,11 +950,11 @@ function renderPregrado(zone, pg){
       <div class="kpi" data-idx="00"><div class="lab">Carreras de pregrado</div><div class="val">${carreras.length}</div>
         <div class="delta flat">${[...new Set(carreras.map(c=>c.modalidad).filter(Boolean))].join(' · ') || 'Modalidad presencial'}</div>
       </div>
-      <div class="kpi" data-idx="01"><div class="lab">Matrícula vigente ${vigY||''}</div><div class="val">${fmtInt(vigV)}</div>
+      <div class="kpi" data-idx="01"><div class="lab">Matrícula Total Vigente ${vigY||''}</div><div class="val">${fmtInt(vigV)}</div>
         ${deltaBadge(yoyDeltaPct(dataSource.vigentes))}
         ${bd('vigentes', vigY, fmtInt)}
       </div>
-      <div class="kpi" data-idx="02"><div class="lab">Nuevos ${nueY||''}</div><div class="val">${fmtInt(nueV)}</div>
+      <div class="kpi" data-idx="02"><div class="lab">Matrícula Primer año ${nueY||''} (Regulares al 30 de Abril)</div><div class="val">${fmtInt(nueV)}</div>
         ${deltaBadge(yoyDeltaPct(dataSource.nuevos))}
         ${bd('nuevos', nueY, fmtInt)}
       </div>
@@ -899,58 +990,64 @@ function renderPregrado(zone, pg){
       </div>
     </div>
 
-    <div class="section-title"><span class="n">01</span><h3>Matrícula Total</h3><div class="line"></div></div>
-    <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente${scopeSuffix}</h4><div class="note">Total vigentes al 30 de abril de cada año${(!selected && carreras.length>1) ? ', por carrera' : ''}</div><canvas id="chartVigentes"></canvas></div>
-    <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente — Total Facultad</h4><div class="note">Suma de todas las carreras, total vigentes al 30 de abril de cada año</div><canvas id="chartVigentesTotal"></canvas></div>
-    <div class="card tall" style="margin-bottom:18px;">${hasGratuidad ? '<h4>% Estudiantes con gratuidad'+scopeSuffix+'</h4><div class="note">Por cohorte, información DAE</div><canvas id="chartGratuidad"></canvas>' : '<h4>% Estudiantes con gratuidad</h4>'+emptyMini('Sin datos disponibles')}</div>
+    <div class="section-title"><span class="n">01</span><h3>Matrícula Estudiantes nuevos</h3><div class="line"></div></div>
+    <div class="chart-grid thirds" style="margin-bottom:18px;">
+      <div class="card">${hasViaAbril ? '<h4 style="margin-bottom:10px;">Estudiantes Regulares al 30 de abril'+scopeSuffix+infoTip('abril')+'</h4><canvas id="chartViaAbril"></canvas>' : '<h4>Estudiantes Regulares al 30 de abril'+infoTip('abril')+'</h4>'+emptyMini('Sin datos disponibles')}</div>
+      <div class="card">${hasViaTotal ? '<h4 style="margin-bottom:10px;">Admisión Total'+scopeSuffix+infoTip('admtotal')+'</h4><canvas id="chartViaTotal"></canvas>' : '<h4>Admisión Total'+infoTip('admtotal')+'</h4>'+emptyMini('Sin datos disponibles')}</div>
+    </div>
 
-    <div class="section-title"><span class="n">02</span><h3>Ocupación de vacantes — 1er semestre</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">02</span><h3>Matrícula Total</h3><div class="line"></div></div>
+    <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente${scopeSuffix}${infoTip('vigentes')}</h4><div class="note">Total vigentes al 30 de abril de cada año${(!selected && carreras.length>1) ? ', por carrera' : ''}</div><canvas id="chartVigentes"></canvas></div>
+    <div class="card tall" style="margin-bottom:18px;"><h4>Evolución de matrícula vigente — Total Facultad${infoTip('vigentesTotal')}</h4><div class="note">Suma de todas las carreras, total vigentes al 30 de abril de cada año</div><canvas id="chartVigentesTotal"></canvas></div>
+    <div class="card tall" style="margin-bottom:18px;">${hasGratuidad ? '<h4>% Estudiantes con gratuidad'+scopeSuffix+infoTip('gratuidad')+'</h4><div class="note">Por cohorte, información DAE</div><canvas id="chartGratuidad"></canvas>' : '<h4>% Estudiantes con gratuidad'+infoTip('gratuidad')+'</h4>'+emptyMini('Sin datos disponibles')}</div>
+
+    <div class="section-title"><span class="n">03</span><h3>Ocupación de vacantes — 1er semestre</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
-      <div class="card">${hasOcupacion ? '<h4>Tasa de ocupación de vacantes</h4><div class="note">% de vacantes cubiertas, línea de 100% como referencia. No considera Conducencias ni PACE.</div><canvas id="chartOcupacion"></canvas>' : '<h4>Tasa de ocupación de vacantes</h4>'+emptyMini('Sin datos disponibles')}</div>
       <div class="card">${hasVacNuevos ? '<h4>Vacantes vs. Estudiantes nuevos por año</h4><div class="note">Comparación directa'+(selected ? scopeSuffix : ', Facultad completa')+'. No considera Conducencias ni PACE, por ser cupos supernumerarios.</div><canvas id="chartVacNuevosComp"></canvas>' : '<h4>Vacantes vs. Estudiantes nuevos por año</h4>'+emptyMini('Sin datos disponibles')}</div>
+      <div class="card">${hasOcupacion ? '<h4>Tasa de ocupación de vacantes'+infoTip('ocupacion')+'</h4><div class="note">% de vacantes cubiertas, línea de 100% como referencia. No considera Conducencias ni PACE.</div><canvas id="chartOcupacion"></canvas>' : '<h4>Tasa de ocupación de vacantes'+infoTip('ocupacion')+'</h4>'+emptyMini('Sin datos disponibles')}</div>
     </div>
     ${hasAltPeriodsFacultad ? `
-    <div class="section-title"><span class="n">02b</span><h3>Complemento — Admisión en otros períodos</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">03b</span><h3>Complemento — Admisión en otros períodos</h3><div class="line"></div></div>
     <div class="note" style="margin:-6px 0 14px; font-size:12px;">Algunas carreras ofrecen vacantes o tienen matriculados fuera del 1er semestre. Como no se consideran en el cálculo de ocupación de vacantes indicado mas arriba, se muestran acá como complemento a esa cifra.</div>
     <div class="chart-grid thirds">
-      <div class="card">${hasAltPeriods ? '<h4>Vacantes vs. matriculados en otros períodos</h4><div class="note">'+(selected ? scopeSuffix.replace(' — ','') : 'Suma Facultad')+': 2do sem., 1er y 3er trimestre</div><canvas id="chartPeriodos"></canvas>' : '<h4>Vacantes vs. matriculados en otros períodos</h4>'+emptyMini('Sin datos disponibles')}</div>
+      <div class="card">${hasAltPeriods ? '<h4>Vacantes vs. matriculados en otros períodos'+infoTip('otrosPeriodos')+'</h4><div class="note">'+(selected ? scopeSuffix.replace(' — ','') : 'Suma Facultad')+': 2do sem., 1er y 3er trimestre</div><canvas id="chartPeriodos"></canvas>' : '<h4>Vacantes vs. matriculados en otros períodos'+infoTip('otrosPeriodos')+'</h4>'+emptyMini('Sin datos disponibles')}</div>
       <div class="card">
         <h4>Detalle por carrera</h4><div class="note">Vacantes ofrecidas y matriculados por año</div>
         ${hasAltPeriods ? '<div class="ledger-wrap" style="border:none;"><table class="ledger" id="tblPeriodos"></table></div>' : emptyMini('Sin datos disponibles')}
       </div>
     </div>` : ''}
 
-    <div class="section-title"><span class="n">03</span><h3>Retención</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">04</span><h3>Retención</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
-      <div class="card"><h4>Retención al 1er año</h4><div class="note">${hasRet1 ? '% de estudiantes que continúan tras el primer año' : 'Sin datos disponibles'}</div>${hasRet1 ? '<canvas id="chartRetencion1"></canvas>' : emptyMini('Sin datos disponibles')}</div>
-      <div class="card"><h4>Retención al 3er año</h4><div class="note">${hasRet3 ? '% de estudiantes que continúan tras el tercer año' : 'Sin datos disponibles'}</div>${hasRet3 ? '<canvas id="chartRetencion3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
+      <div class="card"><h4>Retención al 1er año${infoTip('ret1')}</h4><div class="note">${hasRet1 ? '% de estudiantes que continúan tras el primer año' : 'Sin datos disponibles'}</div>${hasRet1 ? '<canvas id="chartRetencion1"></canvas>' : emptyMini('Sin datos disponibles')}</div>
+      <div class="card"><h4>Retención al 3er año${infoTip('ret3')}</h4><div class="note">${hasRet3 ? '% de estudiantes que continúan tras el tercer año' : 'Sin datos disponibles'}</div>${hasRet3 ? '<canvas id="chartRetencion3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
     </div>
 
     ${(hasGenero && !selected) ? `
-    <div class="section-title"><span class="n">03b</span><h3>Composición por género</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">04b</span><h3>Composición por género</h3><div class="line"></div></div>
     <div class="note" style="margin:-6px 0 14px; font-size:12px;">Matrícula y retención por género. Dato a nivel de Facultad.</div>
     <div class="chart-grid thirds">
       <div class="card"><h4>Matrícula por género</h4><div class="note">% de mujeres y hombres sobre la matrícula total, por año</div><canvas id="chartGeneroMatricula"></canvas></div>
-      <div class="card"><h4>Retención 1er año por género</h4><div class="note">% que continúan tras el primer año, por cohorte de ingreso</div><canvas id="chartGeneroRet1"></canvas></div>
-      <div class="card"><h4>Retención 3er año por género</h4><div class="note">${hasGenero3er ? '% que continúan tras el tercer año, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasGenero3er ? '<canvas id="chartGeneroRet3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
+      <div class="card"><h4>Retención 1er año por género${infoTip('ret1Genero')}</h4><div class="note">% que continúan tras el primer año, por cohorte de ingreso</div><canvas id="chartGeneroRet1"></canvas></div>
+      <div class="card"><h4>Retención 3er año por género${infoTip('ret3Genero')}</h4><div class="note">${hasGenero3er ? '% que continúan tras el tercer año, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasGenero3er ? '<canvas id="chartGeneroRet3"></canvas>' : emptyMini('Sin cohortes con 3 años de antigüedad aún')}</div>
     </div>` : ''}
 
-    <div class="section-title"><span class="n">04</span><h3>Titulación</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">05</span><h3>Titulación</h3><div class="line"></div></div>
     <div class="chart-grid thirds">
-      <div class="card"><h4>Titulación oportuna</h4><div class="note">${hasTitOp ? '% titulados en el tiempo formal de la carrera, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitOp ? '<canvas id="chartTitOportuna"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
-      <div class="card"><h4>Titulación total</h4><div class="note">${hasTitTot ? '% titulados en total (con rezago), por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitTot ? '<canvas id="chartTitTotal"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
+      <div class="card"><h4>Titulación oportuna${infoTip('titop')}</h4><div class="note">${hasTitOp ? '% titulados en el tiempo formal de la carrera + 1 año, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitOp ? '<canvas id="chartTitOportuna"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
+      <div class="card"><h4>Titulación total${infoTip('tittotal')}</h4><div class="note">${hasTitTot ? '% titulados en total, por cohorte de ingreso' : 'Sin datos disponibles'}</div>${hasTitTot ? '<canvas id="chartTitTotal"></canvas>' : emptyMini('Sin cohortes tituladas aún')}</div>
     </div>
     ${!selected ? `<div class="card tall" style="margin-top:18px;">${hasEmpleabilidad ? '<h4>Empleabilidad (Fuente Sies)</h4><div class="note">'+escapeHtml(pg.empleabilidad.descriptor||'')+', por cohorte de egreso</div><canvas id="chartEmpleabilidad"></canvas>' : '<h4>Empleabilidad (Fuente Sies)</h4>'+emptyMini('Sin datos de empleabilidad Sies para esta Facultad')}</div>` : ''}
 
     ${!selected ? `
-    <div class="section-title"><span class="n">05</span><h3>Planta docente y jornadas académicas</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">06</span><h3>Planta docente y jornadas académicas</h3><div class="line"></div></div>
     <div class="chart-grid thirds3">
       <div class="card"><h4>Honorarios, planta y total</h4><div class="note">N° de docentes por tipo de contrato y año</div><canvas id="chartPlanta"></canvas></div>
-      <div class="card"><h4>JCE por jerarquía</h4><div class="note">Distribución por año</div><canvas id="chartJCE"></canvas></div>
-      <div class="card">${hasJCEStudent ? '<h4>Estudiantes por JCE</h4><div class="note">Matrícula vigente / Jornadas completas equivalentes</div><canvas id="chartJCEStudent"></canvas>' : '<h4>Estudiantes por JCE</h4>'+emptyMini('Sin datos disponibles')}</div>
+      <div class="card"><h4>JCE por jerarquía</h4><div class="note">Distribución por año. Excluye honorarios.</div><canvas id="chartJCE"></canvas></div>
+      <div class="card">${hasJCEStudent ? '<h4>Estudiantes por JCE</h4><div class="note">Matrícula vigente / Jornadas completas equivalentes. Excluye honorarios.</div><canvas id="chartJCEStudent"></canvas>' : '<h4>Estudiantes por JCE</h4>'+emptyMini('Sin datos disponibles')}</div>
     </div>` : ''}
 
-    <div class="section-title"><span class="n">06</span><h3>Detalle por carrera</h3><div class="line"></div></div>
+    <div class="section-title"><span class="n">07</span><h3>Detalle por carrera</h3><div class="line"></div></div>
     <div class="ledger-wrap"><table class="ledger" id="tblCarreras"></table></div>
     <div class="note" style="margin-top:8px; font-size:11px;">* La ocupación de vacantes no considera Conducencias ni PACE. Para las carreras con Ingreso DEMRE, la tasa se calcula Matriculados Demre/Vacantes Ofrecidas. Para carreras con ingreso diferente a DEMRE, se calcula (Matriculados Ingreso Especial + Matriculados Ingreso Complementario)/Vacantes Ofrecidas.</div>
   `;
@@ -960,16 +1057,19 @@ function renderPregrado(zone, pg){
   buildVigentesChart(carreras, selected);
   if(hasOcupacion) buildOcupacionChart(dataSource);
   if(hasVacNuevos) buildVacNuevosCompChart(dataSource);
+  const viaYMax = Math.max(viaMaxTotal(dataSource.via_abril), viaMaxTotal(dataSource.via_total));
+  if(hasViaAbril) buildViaIngresoChart('chartViaAbril', dataSource.via_abril, viaYMax);
+  if(hasViaTotal) buildViaIngresoChart('chartViaTotal', dataSource.via_total, viaYMax);
   if(hasAltPeriods){ buildPeriodosChart(periodosCarreras); buildPeriodosTable(periodosCarreras); }
-  if(hasRet1) buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5), RETENCION_INSTITUCIONAL_1ER, selected);
-  if(hasRet3) buildRetencionGenericChart('chartRetencion3', dataSource.retencion_3er_anio, objYears(dataSource.retencion_3er_anio), RETENCION_INSTITUCIONAL_3ER, selected);
+  if(hasRet1) buildRetencionGenericChart('chartRetencion1', dataSource.retencion_1er_anio, YEARS.slice(0,5), RETENCION_INSTITUCIONAL_1ER, selected, pg.total_facultad.retencion_1er_anio);
+  if(hasRet3) buildRetencionGenericChart('chartRetencion3', dataSource.retencion_3er_anio, objYears(dataSource.retencion_3er_anio), RETENCION_INSTITUCIONAL_3ER, selected, pg.total_facultad.retencion_3er_anio);
   if(hasGenero && !selected){
     buildGeneroLineChart('chartGeneroMatricula', pg.genero.matricula_mujer, pg.genero.matricula_hombre, objYears(pg.genero.matricula_mujer), 'Año', '% de matrícula');
     buildGeneroLineChart('chartGeneroRet1', pg.genero.retencion_1er_mujer, pg.genero.retencion_1er_hombre, objYears(pg.genero.retencion_1er_mujer), 'Cohorte de ingreso', '% de retención');
     if(hasGenero3er) buildGeneroLineChart('chartGeneroRet3', pg.genero.retencion_3er_mujer, pg.genero.retencion_3er_hombre, objYears(pg.genero.retencion_3er_mujer), 'Cohorte de ingreso', '% de retención');
   }
-  if(hasTitOp) buildTitulacionChart('chartTitOportuna', dataSource.titulacion_oportuna);
-  if(hasTitTot) buildTitulacionChart('chartTitTotal', dataSource.titulacion_total);
+  if(hasTitOp) buildTitulacionChart('chartTitOportuna', dataSource.titulacion_oportuna, TITULACION_INSTITUCIONAL_OPORTUNA, selected, pg.total_facultad.titulacion_oportuna);
+  if(hasTitTot) buildTitulacionChart('chartTitTotal', dataSource.titulacion_total, TITULACION_INSTITUCIONAL_TOTAL, selected, pg.total_facultad.titulacion_total);
   if(!selected){
     buildPlantaChart(pg.planta_docente);
     buildJCEChart(pg.jce);
@@ -1010,8 +1110,8 @@ function buildVigentesChart(carreras, selected){
     const av = (a.vigentes && a.vigentes['2026']) || 0;
     const bv = (b.vigentes && b.vigentes['2026']) || 0;
     return bv-av;
-  }).slice(0,6);
-  const palette = shadesOf(accentColor(currentFac), Math.max(top.length,1));
+  });
+  const palette = categoricalPalette(Math.max(top.length,1));
   const datasets = top.map((c,i)=>({
     label: shortenName(c.nombre),
     data: seriesFor(c.vigentes, YEARS),
@@ -1135,13 +1235,16 @@ function buildPeriodosTable(carreras){
 }
 
 /* ---- Retención genérica (1er / 3er año) ---- */
-const RETENCION_INSTITUCIONAL_1ER = { 2021:0.83, 2022:0.82, 2023:0.83, 2024:0.82, 2025:0.85 };
-const RETENCION_INSTITUCIONAL_3ER = { 2019:0.71, 2020:0.70, 2021:0.68, 2022:0.68, 2023:0.68 };
-function buildRetencionGenericChart(elId, obj, years, institucional, selected){
+const RETENCION_INSTITUCIONAL_1ER = { 2021:0.8283018867924529, 2022:0.81591737545565, 2023:0.827550491973071, 2024:0.8205521472392638, 2025:0.8465984882169854 };
+const RETENCION_INSTITUCIONAL_3ER = { 2019:0.7050272562083586, 2020:0.6950998185117967, 2021:0.6776798825256976, 2022:0.6784741144414169, 2023:0.6779463243873979 };
+function buildRetencionGenericChart(elId, obj, years, institucional, selected, facultad){
   const ctx = document.getElementById(elId);
   const data = seriesFor(obj, years);
   const ownLabel = selected ? 'Retención Carrera' : 'Retención Facultad';
   const datasets = [{ label: ownLabel, data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }];
+  if(selected && facultad && years.some(y => facultad[String(y)] != null)){
+    datasets.push({ label:'Retención Facultad', data: seriesFor(facultad, years), backgroundColor:'#1A1A1A', borderRadius:4, maxBarThickness:34 });
+  }
   if(institucional){
     datasets.push({ label:'Retención Institucional', data: seriesFor(institucional, years), backgroundColor:'#B9B7AC', borderRadius:4, maxBarThickness:34 });
   }
@@ -1164,13 +1267,22 @@ function buildGeneroLineChart(elId, mujerObj, hombreObj, years, xTitle, yTitle){
 }
 
 /* ---- Titulación (oportuna / total) ---- */
-function buildTitulacionChart(elId, obj){
+const TITULACION_INSTITUCIONAL_OPORTUNA = { 2015:0.4, 2016:0.37, 2017:0.36, 2018:0.38, 2019:0.42, 2020:0.4411111111111111 };
+const TITULACION_INSTITUCIONAL_TOTAL = { 2015:0.5524475524475524, 2016:0.5292908530318602, 2017:0.5208791208791209, 2018:0.5277927684835402, 2019:0.5609756097560976, 2020:0.46944444444444444 };
+function buildTitulacionChart(elId, obj, institucional, selected, facultad){
   const years = objYears(obj);
   const ctx = document.getElementById(elId);
   const data = seriesFor(obj, years);
+  const datasets = [{ label: selected ? 'Titulación Carrera' : 'Titulación Facultad', data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }];
+  if(selected && facultad && years.some(y => facultad[String(y)] != null)){
+    datasets.push({ label:'Titulación Facultad', data: seriesFor(facultad, years), backgroundColor:'#1A1A1A', borderRadius:4, maxBarThickness:34 });
+  }
+  if(institucional){
+    datasets.push({ label:'Titulación Institucional', data: seriesFor(institucional, years), backgroundColor:'#B9B7AC', borderRadius:4, maxBarThickness:34 });
+  }
   charts[elId] = new Chart(ctx, {
     type:'bar',
-    data:{ labels:years, datasets:[{ label:'Cohorte', data, backgroundColor: accentColor(currentFac), borderRadius:4, maxBarThickness:34 }] },
+    data:{ labels:years, datasets },
     options: commonBarOpts({xTitle:'Cohorte de ingreso', yTitle:'% titulados', isPct:true})
   });
 }
@@ -1218,10 +1330,11 @@ function buildJCEStudentChart(jps){
 /* ---- Empleabilidad / Gratuidad ---- */
 function buildEmpleabilidadChart(emp){
   const ctx = document.getElementById('chartEmpleabilidad');
-  const palette = shadesOf(accentColor(currentFac), Math.max(emp.filas.length,1));
+  const filas = emp.filas.filter(f => (f.valores||[]).some(v => v!==null && v!==undefined && v!==''));
+  const palette = shadesOf(accentColor(currentFac), Math.max(filas.length,1));
   charts.empleabilidad = new Chart(ctx, {
     type:'line',
-    data:{ labels: emp.periodos, datasets: emp.filas.map((f,i)=>({
+    data:{ labels: emp.periodos, datasets: filas.map((f,i)=>({
       label: shortenName(f.nombre), data: f.valores, borderColor: palette[i], backgroundColor: palette[i],
       tension:0.3, spanGaps:true, pointRadius:3, borderWidth:2.5
     })) },
@@ -1255,40 +1368,54 @@ function buildGratuidadChart(grat, selected){
   charts.gratuidad = new Chart(ctx, {
     type:'line',
     data:{ labels: years, datasets },
-    options: commonLineOpts({xTitle:'Año', yTitle:'% con gratuidad', isPct:true})
+    options: commonLineOpts({xTitle:'Cohorte', yTitle:'% con gratuidad', isPct:true})
   });
 }
 
 /* ---------------- Carreras table (pregrado) ---------------- */
 function buildCarrerasTable(carreras, selected){
   const tbl = document.getElementById('tblCarreras');
+  const MOD_ORDER = ['DIURNA','VESPERTINA','ONLINE'];
+  const groups = {};
+  carreras.forEach(c=>{
+    const mod = c.modalidad || 'OTRA';
+    (groups[mod] = groups[mod] || []).push(c);
+  });
+  const modKeys = Object.keys(groups).sort((a,b)=>{
+    const ia = MOD_ORDER.indexOf(a), ib = MOD_ORDER.indexOf(b);
+    return (ia===-1?99:ia) - (ib===-1?99:ib);
+  });
+
   let html = `<thead><tr>
     <th>Carrera</th><th>Modalidad</th><th>Acreditación</th>
     <th>Vigentes 2026</th><th>Nuevos 2026</th><th>Ocupación vac. 2026</th><th>Retención 1er año</th><th>Retención 3er año</th>
   </tr></thead><tbody>`;
-  carreras.forEach(c=>{
-    const [retY, retV] = lastEntry(c.retencion_1er_anio);
-    const [ret3Y, ret3V] = lastEntry(c.retencion_3er_anio);
-    const vig2026 = c.vigentes ? c.vigentes['2026'] : null;
-    const nue2026 = c.nuevos ? c.nuevos['2026'] : null;
-    const ocu2026 = c.tasa_ocupacion ? c.tasa_ocupacion['2026'] : null;
-    const barPct = ocu2026!==null && ocu2026!==undefined ? Math.min(ocu2026*100,100) : 0;
-    const isSel = selected && selected.nombre===c.nombre;
-    html += `<tr class="${isSel?'selected-row':''}" data-carrera="${escapeHtml(c.nombre)}" style="cursor:pointer;">
-      <td class="name">${escapeHtml(c.nombre)}</td>
-      <td><span class="mod-badge">${c.modalidad || '—'}</span></td>
-      <td>${c.acreditacion_anios ? c.acreditacion_anios + ' años' : '—'}</td>
-      <td>${fmtInt(vig2026)}</td>
-      <td>${fmtInt(nue2026)}</td>
-      <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${barPct}%"></div></div>${fmtPct(ocu2026)}</div></td>
-      <td>${fmtPct(retV)} <span style="color:var(--ink-soft); font-size:10.5px;">${retY?('\''+String(retY).slice(2)):''}</span></td>
-      <td>${fmtPct(ret3V)} <span style="color:var(--ink-soft); font-size:10.5px;">${ret3Y?('\''+String(ret3Y).slice(2)):''}</span></td>
-    </tr>`;
+  modKeys.forEach(mod=>{
+    html += `<tr class="group-row"><td colspan="8">${escapeHtml(mod)} <span style="font-weight:400; color:var(--ink-soft);">(${groups[mod].length})</span></td></tr>`;
+    groups[mod].forEach(c=>{
+      const [retY, retV] = lastEntry(c.retencion_1er_anio);
+      const [ret3Y, ret3V] = lastEntry(c.retencion_3er_anio);
+      const vig2026 = c.vigentes ? c.vigentes['2026'] : null;
+      const nue2026 = c.nuevos ? c.nuevos['2026'] : null;
+      const ocu2026 = c.tasa_ocupacion ? c.tasa_ocupacion['2026'] : null;
+      const barPct = ocu2026!==null && ocu2026!==undefined ? Math.min(ocu2026*100,100) : 0;
+      const isSel = selected && selected.nombre===c.nombre;
+      html += `<tr class="${isSel?'selected-row':''}" data-carrera="${escapeHtml(c.nombre)}" style="cursor:pointer;">
+        <td class="name">${escapeHtml(c.nombre)}</td>
+        <td><span class="mod-badge">${c.modalidad || '—'}</span></td>
+        <td>${c.acreditacion_anios ? c.acreditacion_anios + ' años' : '—'}</td>
+        <td>${fmtInt(vig2026)}</td>
+        <td>${fmtInt(nue2026)}</td>
+        <td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:${barPct}%"></div></div>${fmtPct(ocu2026)}</div></td>
+        <td>${fmtPct(retV)} <span style="color:var(--ink-soft); font-size:10.5px;">${retY?('\''+String(retY).slice(2)):''}</span></td>
+        <td>${fmtPct(ret3V)} <span style="color:var(--ink-soft); font-size:10.5px;">${ret3Y?('\''+String(ret3Y).slice(2)):''}</span></td>
+      </tr>`;
+    });
   });
   html += '</tbody>';
   tbl.innerHTML = html;
   if(carreras.length>1){
-    tbl.querySelectorAll('tbody tr').forEach(tr=>{
+    tbl.querySelectorAll('tbody tr[data-carrera]').forEach(tr=>{
       tr.addEventListener('click', ()=>{
         const name = tr.getAttribute('data-carrera');
         currentCarrera = (currentCarrera===name) ? null : name;
