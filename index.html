@@ -444,13 +444,22 @@
     display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;
   }
 
+  .contacto{
+    margin-left:auto; max-width:380px; padding:10px 14px; line-height:1.5;
+    background:var(--white); border:1px solid var(--paper-line); border-radius:10px;
+    color:var(--ink); font-size:12.5px;
+  }
+  .contacto a{ color:var(--accent); font-weight:600; text-decoration:none; }
+  .contacto a:hover{ text-decoration:underline; }
+
   @media (max-width:640px){
     .sheet{padding:22px 16px 30px;}
     .tab{padding:11px 14px 13px; font-size:12.5px;}
     .tab span.label{display:none;}
     .fac-header{flex-direction:column;}
     .masthead-logo{height:38px;}
-    .masthead{gap:12px;}
+    .masthead{gap:12px; flex-wrap:wrap;}
+    .contacto{margin-left:0; max-width:none; flex-basis:100%;}
   }
 </style>
 </head>
@@ -496,6 +505,7 @@
       <h1>Indicadores Académicos</h1>
       <div class="masthead-sub">Facultad de Ingeniería</div>
     </div>
+    <div class="contacto">Para cualquier duda o comentario, contactar a<br>Camila Díaz: <a href="mailto:cadiazce@uahurtado.cl">cadiazce@uahurtado.cl</a> y/o<br>Paz Tapia: <a href="mailto:patapia@uahurtado.cl">patapia@uahurtado.cl</a></div>
   </div>
 
   <div class="sheet" id="sheet">
@@ -864,6 +874,27 @@ function buildViaIngresoChart(elId, obj, yMax){
   charts[elId] = new Chart(ctx, { type:'bar', data:{ labels: years, datasets }, options: opts });
 }
 
+
+
+/* ---------------- Ingeniería: los gráficos parten desde el primer año con datos ---------------- */
+Chart.register({
+  id:'trimLeadingYears',
+  beforeInit(chart){
+    const labels = chart.data && chart.data.labels;
+    if(!Array.isArray(labels) || labels.length < 2) return;
+    if(!labels.every(l => /^\d{4}$/.test(String(l)))) return; // solo ejes de años
+    const ds = chart.data.datasets || [];
+    const isRef = d => /Institucional|referencia/i.test(d.label || '');
+    let primary = ds.filter(d => /Carrera/.test(d.label || ''));
+    if(!primary.length) primary = ds.filter(d => !isRef(d));
+    if(!primary.length) return;
+    const has = v => v !== null && v !== undefined && v !== 0 && !(typeof v === 'number' && isNaN(v));
+    let k = labels.findIndex((_, i) => primary.some(d => has(Array.isArray(d.data) ? d.data[i] : null)));
+    if(k <= 0) return;
+    chart.data.labels = labels.slice(k);
+    ds.forEach(d => { if(Array.isArray(d.data)) d.data = d.data.slice(k); });
+  }
+});
 
 /* ---------------- Ayuda de definiciones (?) ---------------- */
 const DEFINICIONES = {"abril": ["Matrícula Admisión al 30 de Abril", "Cantidad de estudiantes nuevos que al 30 de Abril están como alumnos Regulares."], "admtotal": ["Matrícula Admisión Total", "Cantidad total de estudiantes nuevos que se matricularon en el proceso de admisión, estas cifras incluyen a estudiantes que al 30 de Abril ya no eran alumnos Regulares."], "ocupacion": ["Tasa de ocupación", "Corresponde al % de las Vacantes ocupadas. Para Carreras DEMRE el cálculo es Matriculados DEMRE/Vacantes ofrecidas. Mientras que, para Carreras Especiales, el cálculo es (Matriculados DEMRE+ Matriculados Especial y Complementaria)/Vacantes. Se excluyen del cálculo las Conducencias y PACE por ser cupos supernumerarios. Se consideran solo vacantes del 1er semestre."], "ret1": ["Retención 1er Año", "Porcentaje de estudiantes nuevos que, al 30 de abril del año siguiente, siguen matriculados en la misma carrera (X+1)."], "ret3": ["Retención 3er Año", "Porcentaje de estudiantes de una cohorte de ingreso que continúa vigente en la misma carrera al 30 de abril de su tercer año de ingreso (X+3)."], "tittotal": ["Tasa titulación total", "Porcentaje de estudiantes de la cohorte de ingreso indicada con finalización académica (plan de estudios) y finalización total (Plan de estudios + procesos administrativos). Este indicador es acumulativo y considera a todos/as los/as titulados/as de la carrera o programa independiente de su año de titulación. Consolidado al 30 de abril."], "titop": ["Tasa titulación oportuna", "Porcentaje de estudiantes de la cohorte de ingreso indicada con finalización académica (plan de estudios) y finalización total (Plan de estudios + procesos administrativos). Este indicador considera a estudiantes que terminan su carrera dentro de la duración formal del plan de estudios más un año adicional. Consolidado al 30 de abril."], "vigentes": ["Evolución de matrícula vigente", "Total de Estudiantes vigentes al 30 de abril de cada año, por carrera."], "vigentesTotal": ["Evolución de matrícula vigente — Total Facultad", "Total de Estudiantes vigentes al 30 de abril de cada año, en la Facultad."], "gratuidad": ["% Estudiantes con gratuidad", "% de Estudiantes con gratuidad por cohorte de ingreso. En este caso la fecha de corte hasta el 2025 es 31 de Octubre, mientras que para el 2026 es hasta Junio."], "otrosPeriodos": ["Vacantes vs. matriculados en otros períodos", "Corresponde a los matriculados que hay en periodos diferentes al 1er semestre."], "ret1Genero": ["Retención 1er año por género", "Retención 1er Año desagregada por género: porcentaje de estudiantes nuevos que, al 30 de abril del año siguiente, siguen matriculados en la misma carrera (X+1), calculado por separado para cada género.<br><br><i>Ejemplo de lectura: Del total de mujeres que ingresaron el año X, un N% fueron retenidas.</i>"], "ret3Genero": ["Retención 3er año por género", "Retención 3er Año desagregada por género: porcentaje de estudiantes de una cohorte de ingreso que continúa vigente en la misma carrera al 30 de abril de su tercer año de ingreso (X+3), calculado por separado para cada género.<br><br><i>Ejemplo de lectura: Del total de mujeres que ingresaron el año X, un N% fueron retenidas.</i>"]};
